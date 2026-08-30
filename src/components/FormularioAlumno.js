@@ -2,18 +2,14 @@
 
 import { useState } from "react";
 
-export default function FormularioAlumno({ turno }) {
+export default function FormularioAlumno({ turno, onContinuar }) {
     const [nombre, setNombre] = useState("");
     const [materia, setMateria] = useState("");
     const [archivo, setArchivo] = useState(null);
 
     function handleSubmit(e) {
         e.preventDefault();
-        console.log("Fecha:", turno.fecha);
-        console.log("Hora:", turno.hora);
-        console.log("Nombre:", nombre);
-        console.log("Materia:", materia);
-        console.log("Archivo:", archivo);
+        onContinuar({ nombre, materia, archivo });
     }
 
     return (
