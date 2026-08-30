@@ -1,14 +1,16 @@
-    "use client";
+"use client";
 
-    import { useState } from "react";
+import { useState } from "react";
 
-    export default function FormularioAlumno() {
+export default function FormularioAlumno({ turno }) {
     const [nombre, setNombre] = useState("");
     const [materia, setMateria] = useState("");
     const [archivo, setArchivo] = useState(null);
 
     function handleSubmit(e) {
         e.preventDefault();
+        console.log("Fecha:", turno.fecha);
+        console.log("Hora:", turno.hora);
         console.log("Nombre:", nombre);
         console.log("Materia:", materia);
         console.log("Archivo:", archivo);
@@ -46,7 +48,7 @@
 
         <div className="flex flex-col text-left">
             <label htmlFor="archivo" className="mb-1 font-medium">
-            Apuntes de la materia (PDF, foto o Word) - Opcional
+            Apuntes de la materia (PDF, foto o Word) — opcional
             </label>
             <input
             id="archivo"

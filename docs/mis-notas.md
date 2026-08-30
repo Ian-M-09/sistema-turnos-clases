@@ -69,3 +69,19 @@ envio del archivo en el formulario:
 como archivo ya arranca en useState(null), si el alumno nunca toca ese input, se va a mandar tal cual — null — sin romper nada en el handleSubmit. Cuando más adelante conectemos esto a Supabase, simplemente vamos a chequear "si hay archivo, subilo; si no, no subas nada" — no hace falta ningún cambio extra ahora para soportar este caso.
 
 Guardá y probá enviar el formulario sin elegir ningún archivo — debería funcionar igual y en la consola ver Archivo: null. Contame si funcionó.
+
+Calendario.js:
+Array.from({ length: N }, (_, i) => ...): es una forma de generar un array de N elementos sin tenerlos ya escritos a mano. { length: N } le dice "quiero un array de este tamaño", y la función (_, i) => ... se ejecuta por cada posición, donde i es el índice (0, 1, 2...). El _ es una convención para decir "este primer parámetro no me importa, no lo voy a usar" (en este caso sería el valor, que no existe todavía).
+new Date(anio, mes + 1, 0).getDate(): un truco clásico para saber cuántos días tiene un mes. Pedirle "el día 0 del mes siguiente" a JavaScript en realidad te devuelve el último día del mes actual. Es rebuscado pero es la forma estándar de hacerlo sin librerías externas.
+.padStart(2, "0"): convierte, por ejemplo, 9 en "09". Lo necesitamos para que las fechas queden con formato YYYY-MM-DD correcto (con cero adelante en meses/días de un solo dígito).
+Props y comunicación entre componentes (onSeleccionarHorario): fijate que el componente Calendario recibe una función como prop, y la llama cuando el alumno hace clic en un horario (onSeleccionarHorario(diaSeleccionado, hora)). Esto es el patrón estándar en React para que un componente hijo le "avise" algo al padre — el hijo no decide qué hacer con esa información, solo dice "pasó esto", y el padre decide qué hacer.
+disabled={!disponible}: los botones de días sin horarios quedan deshabilitados (no clickeables) automáticamente.
+
+
+pasar datos de padre a hijo con props
+
+Ya vimos cómo un hijo le avisa algo al padre (con una función que le pasás como prop, como onSeleccionarHorario). Ahora necesitamos el camino inverso: que el padre (page.js, que ya sabe el turno elegido) le pase ese dato hacia abajo al hijo (FormularioAlumno). Esto se hace con props normales, así:
+
+FormularioAlumnos.js
+Dato para tus notas: { turno } en la firma de la función (function FormularioAlumno({ turno })) es "destructuring" — en vez de recibir un objeto props completo y después escribir props.turno, le decimos directamente "de todas las props que me llegan, extraeme solo turno". Es una forma más corta y es el estilo que vas a ver en casi todo el código de React.
+
