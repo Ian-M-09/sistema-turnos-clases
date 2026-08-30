@@ -46,3 +46,26 @@ const [nombre, setNombre] = useState("");
 nombre → el valor actual (arranca en "", vacío).
 setNombre → la función que usás para cambiar ese valor.
 useState("") → le decimos que el valor inicial es un string vacío.
+
+
+FormularioAlumno.js:
+
+"use client" (primera línea del archivo): Next.js con App Router, por defecto, renderiza los componentes en el servidor (esto se llama Server Component). Pero useState y cualquier interactividad (clicks, inputs) necesita ejecutarse en el navegador del usuario. Por eso hay que aclararle explícitamente "este componente corre en el cliente" con esa directiva al principio del archivo. Regla práctica: cualquier componente que use useState, onClick, onChange, etc., necesita "use client" arriba de todo.
+value={nombre} + onChange={(e) => setNombre(e.target.value)}: esto es el input controlado que mencioné arriba. value le dice al input qué mostrar (lo que está en el estado), y onChange se dispara cada vez que el usuario tipea una letra, actualizando el estado con lo nuevo que escribió. e.target.value es simplemente "el valor actual de ese input" en el momento del evento.
+handleSubmit(e) y e.preventDefault(): cuando un formulario HTML se envía, por defecto el navegador intenta recargar la página. e.preventDefault() le dice "no hagas eso, yo me encargo con JavaScript". Por ahora, en vez de mandar nada a ningún lado, solo hacemos console.log para confirmar que estamos leyendo bien los datos — más adelante ahí es donde vamos a mandar la reserva a Supabase.
+htmlFor="nombre" en el <label> + id="nombre" en el <input>: esto conecta la etiqueta con el input (accesibilidad — al hacer clic en el texto "Nombre completo", el cursor salta directo al input). htmlFor es el equivalente en JSX de for en HTML normal (otra palabra reservada de JS que React tuvo que renombrar).
+
+e.target.files[0]: files es una lista (por si el input permitiera elegir varios archivos a la vez, que no es nuestro caso). Como acá solo queremos uno, tomamos la posición [0], el primero.
+accept=".pdf,.doc,.docx,image/*": este atributo le sugiere al navegador qué tipo de archivos mostrar/permitir en el selector. image/* significa "cualquier tipo de imagen" (jpg, png, etc.). Ojo: esto es solo una ayuda visual para el usuario, no es una validación de seguridad real — alguien podría igual subir otro tipo de archivo si lo intenta a propósito. La validación "de verdad" (que rechace archivos raros) la vamos a hacer más adelante, del lado del servidor, cuando conectemos esto a Supabase.
+¿Por qué no usamos value acá?: como te comenté arriba, los inputs de archivo son de "solo lectura" desde JavaScript por seguridad — no se puede pre-rellenar qué archivo "ya está" elegido. Por eso el estado (archivo) solo se usa para leer lo que el usuario eligió, nunca para controlarlo hacia atrás como hacíamos con el texto.
+
+FormularioAlumno.js:
+
+inputs de tipo file NO son controlados igual
+
+A diferencia de <input type="text">, un <input type="file"> no se puede controlar con value por motivos de seguridad del navegador (JavaScript no puede "pre-cargar" un archivo en un input de tipo file, solo leer lo que el usuario elige). Por eso el manejo es un poco distinto: en vez de leer e.target.value, leemos e.target.files, que es una lista de los archivos seleccionados.
+
+envio del archivo en el formulario:
+como archivo ya arranca en useState(null), si el alumno nunca toca ese input, se va a mandar tal cual — null — sin romper nada en el handleSubmit. Cuando más adelante conectemos esto a Supabase, simplemente vamos a chequear "si hay archivo, subilo; si no, no subas nada" — no hace falta ningún cambio extra ahora para soportar este caso.
+
+Guardá y probá enviar el formulario sin elegir ningún archivo — debería funcionar igual y en la consola ver Archivo: null. Contame si funcionó.

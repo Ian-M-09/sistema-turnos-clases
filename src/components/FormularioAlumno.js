@@ -1,15 +1,17 @@
-"use client";
+    "use client";
 
-import { useState } from "react";
+    import { useState } from "react";
 
-export default function FormularioAlumno() {
+    export default function FormularioAlumno() {
     const [nombre, setNombre] = useState("");
     const [materia, setMateria] = useState("");
+    const [archivo, setArchivo] = useState(null);
 
     function handleSubmit(e) {
         e.preventDefault();
         console.log("Nombre:", nombre);
         console.log("Materia:", materia);
+        console.log("Archivo:", archivo);
     }
 
     return (
@@ -39,6 +41,19 @@ export default function FormularioAlumno() {
             onChange={(e) => setMateria(e.target.value)}
             className="border rounded-lg px-3 py-2"
             required
+            />
+        </div>
+
+        <div className="flex flex-col text-left">
+            <label htmlFor="archivo" className="mb-1 font-medium">
+            Apuntes de la materia (PDF, foto o Word) - Opcional
+            </label>
+            <input
+            id="archivo"
+            type="file"
+            accept=".pdf,.doc,.docx,image/*"
+            onChange={(e) => setArchivo(e.target.files[0])}
+            className="border rounded-lg px-3 py-2"
             />
         </div>
 
