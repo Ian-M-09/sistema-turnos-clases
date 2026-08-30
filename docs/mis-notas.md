@@ -36,3 +36,13 @@ Notá dos cosas nuevas:
 La línea import Link from "next/link"; arriba de todo — cualquier componente especial de Next.js hay que importarlo primero, igual que harías con cualquier librería en Node.
 <Link href="/"> en vez de <a href="/"> — la sintaxis es casi idéntica a la de <a>, cambia solo el nombre de la etiqueta y que ahora es un componente de React, no HTML puro.
 
+inputs controlados con useState
+
+En HTML plano, un <input> guarda su propio valor internamente y vos lo leés cuando lo necesitás (por ejemplo, al hacer submit). En React se trabaja distinto: el valor del input vive en el estado del componente (una variable especial de React), y cada vez que el usuario tipea algo, se actualiza esa variable. Esto se llama input controlado, porque React "controla" en todo momento qué hay escrito ahí.
+
+Para esto usamos un Hook de React llamado useState. Un Hook es simplemente una función especial de React que te da superpoderes dentro de un componente. useState te da dos cosas: una variable con el valor actual, y una función para actualizarla
+
+const [nombre, setNombre] = useState("");
+nombre → el valor actual (arranca en "", vacío).
+setNombre → la función que usás para cambiar ese valor.
+useState("") → le decimos que el valor inicial es un string vacío.
