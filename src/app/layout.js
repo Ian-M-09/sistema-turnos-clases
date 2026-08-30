@@ -19,10 +19,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">{children}
+        <footer style={{ textAlign: "center", padding: "1rem", fontSize: "0.9rem" }}>
+          Desarrollado por{" "}
+          <a href="https://github.com/Ian-M-09" target="_blank" rel="noopener noreferrer">
+            Ian Miño
+          </a>
+        </footer>
+      </body>
     </html>
   );
 }
