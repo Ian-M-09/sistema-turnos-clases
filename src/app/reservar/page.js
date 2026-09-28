@@ -11,8 +11,10 @@ export default function Reservar() {
     const [turnoElegido, setTurnoElegido] = useState(null);
     const [datosAlumno, setDatosAlumno] = useState(null);
 
-    function handleSeleccionarHorario(fecha, hora) {
-        setTurnoElegido({ fecha, hora });
+    function handleSeleccionarHorario(fecha, hora, disponibilidadId) {
+        // Ahora recibe un tercer dato: el id del horario en la base de datos.
+        setTurnoElegido({ fecha, hora, disponibilidadId });
+        // Lo guardamos junto con la fecha y la hora en el mismo objeto.
         setPaso("datos");
     }
 
