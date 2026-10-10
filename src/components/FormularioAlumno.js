@@ -122,14 +122,27 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             <label htmlFor="materia" className="mb-1 font-medium">
             Materia - obligatorio
             </label>
-            <input
-            id="materia"
-            type="text"
-            value={materia}
-            onChange={(e) => setMateria(e.target.value)}
-            className="border rounded-lg px-3 py-2"
-            required
-            />
+            <select
+                id="materia"
+                value={materia}
+                onChange={(e) => setMateria(e.target.value)}
+                className="border rounded-lg px-3 py-2"
+                required
+            >
+            {/* <select> muestra una lista deplegable. Cada <option> de adentro es una opcion elegible. el "value"
+            del select sigue funcionando igual que con un input de texto: se actualiza con onChance */}
+            <option value="">Elegí una materia</option>
+            {/*esta opcion vacia fuerza a que el alumno elija algo a proposito,
+            en vez de que quede seleccionada la primer materia por defecto */}
+            <option value="Lengua">Lengua</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Preparación Global 5to (BHM)">Preparación para el Global de 5to (BHM)</option>
+            <option value="Inglés">Inglés</option>
+            <option value="Latín">Latín</option>
+            <option value="Griego">Griego</option>
+            <option value="Dibujo">Dibujo</option>
+            <option value="Apoyo con tareas">Apoyo con tareas</option>
+            </select>
         </div>
 
         <div className="flex flex-col text-left">

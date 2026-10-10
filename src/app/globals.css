@@ -1,26 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --fondo: #f6e9da;
+  /* Crema más marcado, con más calidez que el anterior. */
+  --superficie: #ffffff;
+  --texto: #9F6570;
+  --borde: #e3b6bc;
+  /* Un poco más saturado que antes, para que los bordes se noten. */
+  --acento: #a8465c;
+  /* Rosa más vivo y saturado que el Rosewood original, para que los
+     botones se destaquen de verdad. */
+  --acento-hover: #8a3649;
+  /* Un escalón más oscuro, para el estado hover. */
+  --aviso: #b77f87;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-texto: var(--texto);
+  --color-borde: var(--borde);
+  --color-acento: var(--acento);
+  --color-acento-hover: var(--acento-hover);
+  --color-aviso: var(--aviso);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--font-work-sans), sans-serif;
+  /* Acá sí referenciamos la variable real de next/font directamente,
+     no un alias de @theme. */
+}
+
+h1, h2, h3 {
+  font-family: var(--font-lora), serif;
+  /* Mismo criterio: variable real, no el alias que no se exportaba. */
+}
+
+select {
+  background-color: var(--superficie);
+  color: var(--texto);
+}
+
+select option {
+  background-color: var(--superficie);
+  color: var(--texto);
 }

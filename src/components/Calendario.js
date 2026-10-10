@@ -157,7 +157,7 @@ export default function Calendario({ onSeleccionarHorario }) {
             onClick={() => cambiarMes(-1)}
             disabled={!puedeRetroceder}
             aria-label="Mes anterior"
-            className="px-3 py-1 rounded-lg border disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-lg border border-borde hover:bg-acento/10 disabled:opacity-30 disabled:cursor-not-allowed"
             >
             ←
             </button>
@@ -174,7 +174,7 @@ export default function Calendario({ onSeleccionarHorario }) {
             onClick={() => cambiarMes(1)}
             disabled={!puedeAvanzar}
             aria-label="Mes siguiente"
-            className="px-3 py-1 rounded-lg border disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-lg border border-borde hover:bg-acento/10 disabled:opacity-30 disabled:cursor-not-allowed"
             >
             →
             </button>
@@ -206,8 +206,8 @@ export default function Calendario({ onSeleccionarHorario }) {
                 onClick={() => handleClickDia(dia)}
                 disabled={!disponible}
                 className={`p-2 rounded-lg text-sm
-                    ${disponible ? "bg-blue-100 hover:bg-blue-200 cursor-pointer" : "bg-gray-100 text-gray-400 cursor-not-allowed"}
-                    ${seleccionado ? "bg-blue-600 text-white" : ""}
+                ${disponible ? "bg-superficie border border-borde hover:bg-acento/10 cursor-pointer" : "bg-fondo text-texto/30 cursor-not-allowed"}
+                ${seleccionado ? "bg-acento text-white" : ""}
                 `}
                 >
                 {dia}
@@ -224,10 +224,10 @@ export default function Calendario({ onSeleccionarHorario }) {
                 <button
                     key={h.id}
                     onClick={() => onSeleccionarHorario(diaSeleccionado, h.hora, h.id)}
-                    className="border rounded-lg px-3 py-2 hover:bg-blue-50"
+                    className="border border-borde rounded-lg px-3 py-2 bg-superficie hover:bg-acento/10"
                 >
                     {h.hora}
-                    {h.lugares === 1 && (<span className="ml-2 text-xs text-orange-600">¡Ultimo lugar!</span> )}
+                    {h.lugares === 1 && (<span className="ml-2 text-xs text-aviso font-medium">¡Último lugar!</span> )}
                 </button>
                 ))}
                 {/*en JSX (next.js) los comentarios van asi. h.lugares===1 compara: da true solo si queda exactamente 1 lugar. <span> es una etiqueta de texto en linea, sirve para darle estilo a un pedazo de 

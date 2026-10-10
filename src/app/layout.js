@@ -1,13 +1,15 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Lora, Work_Sans } from "next/font/google";
+// Antes importábamos Geist y Geist_Mono. Las cambiamos por estas dos.
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const lora = Lora({
+  variable: "--font-lora",
+  // Esto crea la variable CSS --font-lora, que usamos en globals.css.
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const workSans = Work_Sans({
+  variable: "--font-work-sans",
   subsets: ["latin"],
 });
 
@@ -18,16 +20,21 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}
-        <footer style={{ textAlign: "center", padding: "1rem", fontSize: "0.9rem" }}>
-          Desarrollado por{" "}
-          <a href="https://github.com/Ian-M-09" target="_blank" rel="noopener noreferrer">
-            Ian Miño
-          </a>
+    <html lang="es" className="h-full antialiased"  >
+
+      <body className={`${lora.variable} ${workSans.variable} antialiased`}>{children}
+        <footer className="border-t border-borde mt-auto py-6 text-center text-sm text-texto/70">
+          <p>
+            Desarrollado por{" "}
+            <a
+              href="https://ian-m-09.github.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-texto hover:text-acento-hover underline underline-offset-2"
+            >
+              Ian Miño
+            </a>
+          </p>
         </footer>
       </body>
     </html>
