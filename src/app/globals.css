@@ -13,6 +13,7 @@
   --acento-hover: #8a3649;
   /* Un escalón más oscuro, para el estado hover. */
   --aviso: #b77f87;
+  --rosa-suave: #f4d4da;
 }
 
 @theme inline {
@@ -23,6 +24,7 @@
   --color-acento: var(--acento);
   --color-acento-hover: var(--acento-hover);
   --color-aviso: var(--aviso);
+  --color-rosa-suave: var(--rosa-suave);
 }
 
 body {
@@ -46,4 +48,10 @@ select {
 select option {
   background-color: var(--superficie);
   color: var(--texto);
+}
+
+h1, h2 {
+  color: var(--acento-hover);
+  /* Los títulos ya no usan el marrón del texto: toman el rosa oscuro,
+     que sobre el crema se lee bien (el contraste es alto). */
 }

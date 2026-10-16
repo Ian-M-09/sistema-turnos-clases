@@ -16,7 +16,7 @@ export default function ComprobantePago({ onConfirmar }) {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md text-left">
-        <div className="bg-gray-100 rounded-lg p-4 text-center">
+        <div className="bg-superficie border border-borde rounded-lg p-4 text-center">
             <p className="font-medium mb-1">Transferir depósito de ${MONTO_DEPOSITO}</p>
             <p className="text-sm">Alias: <strong>{ALIAS_PROFESORA}</strong></p>
             <p className="text-sm">CBU: <strong>{CBU_PROFESORA}</strong></p>
@@ -31,14 +31,14 @@ export default function ComprobantePago({ onConfirmar }) {
             type="file"
             accept=".pdf,image/*"
             onChange={(e) => setComprobante(e.target.files[0])}
-            className="border rounded-lg px-3 py-2"
+            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
             required
             />
         </div>
 
         <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
         >
             Confirmar reserva
         </button>

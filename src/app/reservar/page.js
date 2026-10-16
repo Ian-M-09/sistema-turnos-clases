@@ -49,7 +49,7 @@ export default function Reservar() {
             </p>
             <button
                 onClick={() => setPaso("calendario")}
-                className="text-blue-600 hover:underline text-sm"
+                className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
             >
                 Cambiar horario
             </button>
@@ -68,7 +68,7 @@ export default function Reservar() {
         )}
 
         {paso !== "listo" && (
-            <Link href="/" className="text-blue-600 hover:underline">
+            <Link href="/" className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition">
             ← Volver al inicio
             </Link>
         )}

@@ -7,7 +7,7 @@ export default function Home() {
       <p className="text-lg mb-6">
         Reservá tu turno según los horarios disponibles.
       </p>
-      <Link href="/reservar" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+      <Link href="/reservar" className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition">
         Reservar un turno
       </Link>
     </main>

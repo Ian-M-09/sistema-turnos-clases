@@ -157,7 +157,7 @@ export default function Calendario({ onSeleccionarHorario }) {
             onClick={() => cambiarMes(-1)}
             disabled={!puedeRetroceder}
             aria-label="Mes anterior"
-            className="px-3 py-1 rounded-lg border border-borde hover:bg-acento/10 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-lg border border-borde bg-rosa-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
             >
             ←
             </button>
@@ -174,13 +174,13 @@ export default function Calendario({ onSeleccionarHorario }) {
             onClick={() => cambiarMes(1)}
             disabled={!puedeAvanzar}
             aria-label="Mes siguiente"
-            className="px-3 py-1 rounded-lg border border-borde hover:bg-acento/10 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-lg border border-borde bg-rosa-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
             >
             →
             </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 text-sm mb-2 font-medium">
+        <div className="grid grid-cols-7 gap-2 text-sm mb-2 font-semibold text-acento">
             <span>Dom</span>
             <span>Lun</span>
             <span>Mar</span>
@@ -205,9 +205,12 @@ export default function Calendario({ onSeleccionarHorario }) {
                 key={dia}
                 onClick={() => handleClickDia(dia)}
                 disabled={!disponible}
-                className={`p-2 rounded-lg text-sm
-                ${disponible ? "bg-superficie border border-borde hover:bg-acento/10 cursor-pointer" : "bg-fondo text-texto/30 cursor-not-allowed"}
-                ${seleccionado ? "bg-acento text-white" : ""}
+                className={`p-2 rounded-lg text-sm border
+                ${seleccionado
+                    ? "bg-acento border-acento text-white"
+                    : disponible
+                    ? "bg-rosa-suave border-borde text-acento-hover font-medium hover:bg-borde cursor-pointer"
+                    : "bg-fondo border-transparent text-texto/30 cursor-not-allowed"}
                 `}
                 >
                 {dia}
@@ -224,7 +227,7 @@ export default function Calendario({ onSeleccionarHorario }) {
                 <button
                     key={h.id}
                     onClick={() => onSeleccionarHorario(diaSeleccionado, h.hora, h.id)}
-                    className="border border-borde rounded-lg px-3 py-2 bg-superficie hover:bg-acento/10"
+                    className="border border-borde rounded-lg px-3 py-2 bg-rosa-suave text-acento-hover font-medium hover:bg-borde"
                 >
                     {h.hora}
                     {h.lugares === 1 && (<span className="ml-2 text-xs text-aviso font-medium">¡Último lugar!</span> )}
