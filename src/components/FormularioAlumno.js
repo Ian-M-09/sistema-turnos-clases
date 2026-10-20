@@ -71,7 +71,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
         <div className="flex flex-col text-left">
             <label htmlFor="nombre" className="mb-1 font-medium">
-            Nombre - obligatorio
+            Nombre
             </label>
             <input
             id="nombre"
@@ -85,7 +85,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
 
         <div className="flex flex-col text-left">
             <label htmlFor="apellido" className="mb-1 font-medium">
-            Apellido - obligatorio
+            Apellido
             </label>
             <input
             id="apellido"
@@ -99,7 +99,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
 
         <div className="flex flex-col text-left">
             <label htmlFor="telefono" className="mb-1 font-medium">
-            Teléfono (10 dígitos) - obligatorio
+            Teléfono (10 dígitos)
             </label>
             <input
             id="telefono"
@@ -120,7 +120,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
 
         <div className="flex flex-col text-left">
             <label htmlFor="materia" className="mb-1 font-medium">
-            Materia - obligatorio
+            Materia
             </label>
             <select
                 id="materia"
@@ -147,7 +147,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
 
         <div className="flex flex-col text-left">
             <label htmlFor="anioCursando" className="mb-1 font-medium">
-            Año que está cursando - opcional
+            Año que está cursando
             </label>
             <input
             id="anioCursando"
@@ -161,7 +161,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
 
         <div className="flex flex-col text-left">
             <label htmlFor="notas" className="mb-1 font-medium">
-            Notas adicionales — opcional
+            Notas adicionales
             </label>
             <textarea
             id="notas"
@@ -174,7 +174,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
 
         <div className="flex flex-col text-left">
             <label htmlFor="archivo" className="mb-1 font-medium">
-            Apuntes de la materia (PDF, foto o Word) — opcional
+            Apuntes de la materia (PDF, foto o Word)
             </label>
             <input
             id="archivo"
