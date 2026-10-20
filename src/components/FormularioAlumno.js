@@ -78,7 +78,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             required
             />
         </div>
@@ -92,7 +92,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             type="text"
             value={apellido}
             onChange={(e) => setApellido(e.target.value)}
-            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             required
             />
         </div>
@@ -113,7 +113,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             maxLength={10}
             // maxLength bloquea a nivel navegador que se escriban más de
             // 10 caracteres, aunque ya lo controlamos también en JS arriba.
-            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             required
             />
         </div>
@@ -126,7 +126,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
                 id="materia"
                 value={materia}
                 onChange={(e) => setMateria(e.target.value)}
-                className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+                className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
                 required
             >
             {/* <select> muestra una lista deplegable. Cada <option> de adentro es una opcion elegible. el "value"
@@ -155,7 +155,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             value={anioCursando}
             onChange={(e) => setAnioCursando(e.target.value)}
             placeholder="Ej: 3er año secundaria, 1er año facultad..."
-            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             />
         </div>
 
@@ -168,7 +168,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             value={notas}
             onChange={(e) => setNotas(e.target.value)}
             rows={3}
-            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             />
         </div>
 
@@ -181,7 +181,7 @@ export default function FormularioAlumno({ turno, onContinuar }) {
             type="file"
             accept=".pdf,.doc,.docx,image/*"
             onChange={(e) => setArchivo(e.target.files[0])}
-            className="border border-borde rounded-lg px-3 py-2 bg-superficie"
+            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             />
         </div>
 

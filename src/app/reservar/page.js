@@ -11,10 +11,10 @@ export default function Reservar() {
     const [turnoElegido, setTurnoElegido] = useState(null);
     const [datosAlumno, setDatosAlumno] = useState(null);
 
-    function handleSeleccionarHorario(fecha, hora, disponibilidadId) {
-        // Ahora recibe un tercer dato: el id del horario en la base de datos.
-        setTurnoElegido({ fecha, hora, disponibilidadId });
-        // Lo guardamos junto con la fecha y la hora en el mismo objeto.
+    function handleConfirmarHorarios(fecha, horarios, resumen, minutosTotales) {
+        // Ahora recibe el día, la LISTA de horarios (cada uno con su id), el
+        // texto resumen para mostrar y los minutos totales de la reserva.
+        setTurnoElegido({ fecha, horarios, resumen, minutosTotales });
         setPaso("datos");
     }
 
@@ -34,18 +34,18 @@ export default function Reservar() {
     }
 
     return (
-        <main className="flex flex-col items-center justify-center flex-1 text-center p-8 gap-6">
+        <main className="flex flex-col items-center justify-center flex-1 text-center p-4 sm:p-8 gap-6">
         <h1 className="text-3xl font-bold">Reservar un turno</h1>
 
         {paso === "calendario" && (
-            <Calendario onSeleccionarHorario={handleSeleccionarHorario} />
+            <Calendario onConfirmarHorarios={handleConfirmarHorarios} />
         )}
 
         {paso === "datos" && (
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-4 w-full max-w-md">
             <p className="text-lg">
-                Turno elegido: <strong>{turnoElegido.fecha}</strong> a las{" "}
-                <strong>{turnoElegido.hora}</strong>
+                Turno elegido: <strong>{turnoElegido.fecha}</strong>,{" "}
+                <strong>{turnoElegido.resumen}</strong>
             </p>
             <button
                 onClick={() => setPaso("calendario")}
@@ -53,22 +53,32 @@ export default function Reservar() {
             >
                 Cambiar horario
             </button>
-            <FormularioAlumno turno={turnoElegido} onContinuar={handleContinuarDatos} />
+            <FormularioAlumno
+                turno={turnoElegido}
+                onContinuar={handleContinuarDatos}
+            />
             </div>
         )}
 
         {paso === "pago" && (
-            <ComprobantePago onConfirmar={handleConfirmarPago} />
+            <ComprobantePago
+            minutos={turnoElegido.minutosTotales}
+            onConfirmar={handleConfirmarPago}
+            />
         )}
 
         {paso === "listo" && (
             <p className="text-lg">
-            ¡Listo! Tu turno quedó pendiente de confirmación por parte de la profesora.
+            ¡Listo! Tu turno quedó pendiente de confirmación por parte de la
+            profesora.
             </p>
         )}
 
         {paso !== "listo" && (
-            <Link href="/" className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition">
+            <Link
+            href="/"
+            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+            >
             ← Volver al inicio
             </Link>
         )}
