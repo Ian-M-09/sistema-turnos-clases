@@ -1,21 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
-const CBU_PROFESORA = "0070173630004126905435";
-const ALIAS_PROFESORA = "gcread";
-const NOMBRE = "Guillermina Cruz Read";
-const MONTO_DEPOSITO_POR_HORA = 15000;
-// Ahora es un número (sin comillas) para poder multiplicarlo.
-// Sigue siendo un valor de prueba hasta que la profesora confirme el monto.
+// El depósito por hora, el CBU, el alias y el titular ya no están escritos
+// acá: se leen de la tabla configuracion de Supabase. Así los datos reales
+// de la cuenta no quedan en el repo público y la profesora los puede
+// cambiar sin tocar el código.
 
 export default function ComprobantePago({ minutos, onConfirmar }) {
     const [comprobante, setComprobante] = useState(null);
+    const [config, setConfig] = useState(null);
+    // config guarda la fila de configuracion; null mientras no llegó.
+    const [errorCarga, setErrorCarga] = useState(null);
 
-    const montoTotal = Math.round((MONTO_DEPOSITO_POR_HORA * minutos) / 60);
+    useEffect(() => {
+        async function cargarConfiguracion() {
+            const { data, error } = await supabase
+                .from("configuracion")
+                .select("deposito_por_hora, cbu, alias, titular")
+                .single();
+            // .single() pide exactamente una fila y la devuelve como objeto
+            // (no como lista). La tabla siempre tiene una sola fila.
+
+            if (error) {
+                setErrorCarga("No se pudieron cargar los datos de pago. Probá de nuevo más tarde.");
+                return;
+            }
+            setConfig(data);
+        }
+
+        cargarConfiguracion();
+    }, []);
+
+    if (errorCarga) {
+        return <p className="text-center">{errorCarga}</p>;
+    }
+    if (!config) {
+        return <p className="text-center">Cargando datos de pago...</p>;
+        // "!config" es true cuando config todavía es null.
+    }
+
+    const depositoPorHora = Number(config.deposito_por_hora);
+    // Supabase devuelve las columnas numeric como texto ("15000.00") para
+    // no perder precisión. Number() lo convierte en número para hacer cuentas.
+    const montoTotal = Math.round((depositoPorHora * minutos) / 60);
     // El depósito es proporcional al tiempo: para 3 h 30 min (210 minutos)
-    // da 5000 * 210 / 60 = 17500. "*" multiplica y "/" divide.
+    // da 15000 * 210 / 60 = 52500. "*" multiplica y "/" divide.
     // Math.round redondea al entero más cercano, por si la cuenta da decimales.
+    // Es solo para mostrar: el monto que se guarda lo calcula la base (A2).
 
     function handleSubmit(e) {
         e.preventDefault();
@@ -34,20 +67,20 @@ export default function ComprobantePago({ minutos, onConfirmar }) {
             {minutos !== 60 && (
             <p className="text-sm mb-1">
                 {(minutos / 60).toLocaleString("es-AR")} horas × $
-                {MONTO_DEPOSITO_POR_HORA.toLocaleString("es-AR")}
+                {depositoPorHora.toLocaleString("es-AR")}
             </p>
             )}
             {/* .toLocaleString("es-AR") formatea con estilo argentino: 17500 →
                 "17.500" y 3.5 → "3,5". "!==" significa "distinto de": la línea
                 de la cuenta solo aparece cuando no es exactamente 1 hora. */}
             <p className="text-sm">
-            Alias: <strong>{ALIAS_PROFESORA}</strong>
+            Alias: <strong>{config.alias}</strong>
             </p>
             <p className="text-sm">
-            CBU: <strong>{CBU_PROFESORA}</strong>
+            CBU: <strong>{config.cbu}</strong>
             </p>
             <p className="text-sm">
-            Nombre: <strong>{NOMBRE}</strong>
+            Nombre: <strong>{config.titular}</strong>
             </p>
         </div>
 

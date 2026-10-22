@@ -84,4 +84,3 @@ Ya vimos cómo un hijo le avisa algo al padre (con una función que le pasás co
 
 FormularioAlumnos.js
 Dato para tus notas: { turno } en la firma de la función (function FormularioAlumno({ turno })) es "destructuring" — en vez de recibir un objeto props completo y después escribir props.turno, le decimos directamente "de todas las props que me llegan, extraeme solo turno". Es una forma más corta y es el estilo que vas a ver en casi todo el código de React.
-
