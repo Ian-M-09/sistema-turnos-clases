@@ -1,6 +1,6 @@
 Sistema de turnos: plan de ejecución
 
-Última actualización: 20/10/2026
+Última actualización: 27/10/2026
 
 1. Qué es el proyecto
 
@@ -27,15 +27,18 @@ Estructura: src/app (layout.js, page.js, globals.css, reservar/page.js), src/com
 Pantallas: Home con botón "Reservar un turno" y /reservar en 4 pasos (calendario, datos, comprobante, listo). El paso final todavía solo hace console.log: no se guarda nada.
 
 Calendario: mes actual con flechas (hasta 2 meses adelante). Lee disponibilidad de Supabase, oculta los horarios llenos y los que faltan menos de 24 hs. El alumno elige hora de inicio y duración (horas enteras seguidas del mismo día, más una media hora final si está cargada). Muestra "¡Último lugar!" cuando queda 1 lugar.
-Formulario: nombre, apellido, teléfono (10 dígitos), materia (lista fija: Lengua, Matemática, Preparación para el Global de 5to (BHM), Inglés, Latín, Griego, Dibujo, Apoyo con tareas), año que cursa (opcional), notas (opcional) y archivo de apuntes (opcional; PDF, foto o Word).
+Formulario: nombre, apellido, teléfono (10 dígitos), materia (lista fija: Lengua, Matemática, Preparación para el Global de 5to (BHM), Inglés, Latín, Griego, Dibujo, Apoyo con tareas), año que cursa (opcional), notas (opcional) y archivo de apuntes (opcional; PDF, foto o Word). Hoy acepta un solo archivo; en A4 pasa a aceptar varios que sumen hasta 3 MB.
 Comprobante: muestra CBU y alias (valores de PRUEBA) y un monto = 15000 × minutos / 60 (monto de PRUEBA). Desde A2 el precio, CBU, alias y titular viven en la tabla configuracion (supabase/005_configuracion.sql); la pantalla tiene que pasar a leerlos de ahí. El comprobante es obligatorio.
 Diseño: paleta rosa sobre fondo crema, fuentes Lora (títulos) y Work Sans, adaptado a celulares, footer "Desarrollado por Ian Miño" con link a https://ian-m-09.github.io/.
 
-Base de datos (RLS activado en las tres tablas):
+Base de datos (RLS activado en todas las tablas):
 
 disponibilidad: id, fecha, hora, cupo_maximo (5), cupo_ocupado (0), duracion_minutos (60 o 30). Unique (fecha, hora) y check de cupos. Tiene una política de lectura pública (anon, solo select).
-turnos: id, disponibilidad_id, nombre, apellido, telefono, materia, anio_cursando, notas, archivo_url, comprobante_url, estado (pendiente_pago / confirmado / rechazado), creado_en. Sin políticas (cerrada). Su diseño hay que revisarlo por las reservas de varias horas (ver A1).
-chats: id, turno_id (on delete cascade), historial jsonb, creado_en. Sin políticas (cerrada).
+reservas: id, nombre, apellido, telefono, materia, anio_cursando, notas, apuntes (lista de nombres de archivo), comprobante_url (nombre de archivo, único), monto, estado (pendiente_pago / confirmado / rechazado), creado_en. Sin políticas (cerrada); se escribe solo con la función crear_reserva.
+reserva_horarios: reserva_id (on delete cascade), disponibilidad_id. Une cada reserva con sus horarios. Sin políticas (cerrada).
+chats: id, reserva_id (único, on delete cascade), historial jsonb, creado_en. Sin políticas (cerrada).
+configuracion: una sola fila con deposito_por_hora, CBU, alias y titular.
+Storage: buckets privados comprobantes (2 MB por archivo) y apuntes (3 MB en total por reserva). anon solo puede subir archivos con nombre uuid.extensión; no puede leerlos, reemplazarlos ni borrarlos.
 4. Reglas de negocio y decisiones tomadas
 Una sola profesora. Los alumnos no tienen cuenta ni perfil guardado.
 Clases de 1 hora, mínimo 1 hora por reserva. Reservas de varias horas: siempre seguidas y del mismo día, sin tope de cantidad (lo limita lo que la profesora cargó).
@@ -73,9 +76,9 @@ Cuando exista el guardado real, las pruebas en la demo crean filas reales en la 
 Fase A: guardar la reserva de verdad (núcleo)
 A0. Guardar en el repo (carpeta supabase/) los scripts SQL que ya se corrieron (tablas, columna duracion_minutos, política de lectura) y todos los que vengan, para poder recrear la base en otra cuenta. YA ESTA HECHO
 A1. Decidir el diseño de tablas. Recomendación: una tabla reservas (datos del alumno, archivos, estado, monto, creado_en, guardados una sola vez) y una tabla que una cada reserva con sus horarios de disponibilidad; así confirmar o rechazar es un solo cambio. Alternativa: una fila en turnos por horario con un reserva_id común (duplica los datos del alumno). DECIDIDO: dos tablas (reservas + reserva_horarios), turnos se borra, el monto se guarda en la reserva (lo calcula la base). Script: supabase/004_reservas.sql. YA ESTA HECHO (corrido en Supabase).
-A2. Función SQL (RPC) transaccional "crear reserva": valida que los horarios existan, sean seguidos y del mismo día, respeten las 24 hs y tengan lugar. Descuenta un lugar en cada uno y crea la reserva en pendiente_pago, todo o nada. Si alguien ocupó el último lugar mientras el alumno completaba el formulario, devuelve un error claro. El navegador solo puede ejecutar esa función; no inserta directo en las tablas. YA ESTA HECHO (supabase/006_crear_reserva.sql, corrido y probado en el SQL Editor; el monto sale de la tabla configuracion). Falta verificar en A3/A4 que comprobante_url apunte a un archivo subido de verdad.
-A3. Storage de Supabase: buckets privados (apuntes y comprobantes), tipos permitidos (PDF, imágenes, Word), tamaño máximo, nombres aleatorios y políticas mínimas. Cuidar el límite de 1 GB del plan gratuito.
-A4. Conectar el paso final de /reservar: subir archivos, llamar a la función y mostrar el resultado o el error (reemplazar los alert() por mensajes en pantalla).
+A2. Función SQL (RPC) transaccional "crear reserva": valida que los horarios existan, sean seguidos y del mismo día, respeten las 24 hs y tengan lugar. Descuenta un lugar en cada uno y crea la reserva en pendiente_pago, todo o nada. Si alguien ocupó el último lugar mientras el alumno completaba el formulario, devuelve un error claro. El navegador solo puede ejecutar esa función; no inserta directo en las tablas. YA ESTA HECHO (supabase/006_crear_reserva.sql, corrido y probado en el SQL Editor; el monto sale de la tabla configuracion). La verificación de archivos (que existan en Storage y no se usen dos veces) se agregó en 008.
+A3. Storage de Supabase: buckets privados (apuntes y comprobantes), tipos permitidos (PDF, imágenes, Word), tamaño máximo, nombres aleatorios y políticas mínimas. Cuidar el límite de 1 GB del plan gratuito. DECIDIDO: 1 comprobante de hasta 2 MB + varios archivos de apuntes que sumen hasta 3 MB (máximo 5 MB por reserva; la suma la controla crear_reserva); tipos PDF, JPEG, PNG, WebP y .docx (este solo en apuntes); sin HEIC (el iPhone convierte a JPEG solo), sin SVG ni .doc. Las fotos se achican solas en el navegador (A4). Nombres = UUID + extensión; anon solo puede subir, no leer, reemplazar ni borrar. Script: supabase/007_storage.sql. Script supabase/008_archivos_reserva.sql: reservas.archivo_url pasa a apuntes text[]; crear_reserva verifica que los archivos existan en storage.objects, que no se usen en otra reserva (comprobante_url unique) y que los apuntes sumen como máximo 3 MB. Archivos huérfanos (subidos sin reserva): se borran en la limpieza de mitad de mes (ver E4). YA ESTA HECHO (007 y 008 corridos y probados en el SQL Editor).
+A4. Conectar el paso final de /reservar: subir archivos, llamar a la función y mostrar el resultado o el error (reemplazar los alert() por mensajes en pantalla). Incluye: varios archivos de apuntes con el total usado de los 3 MB en pantalla; achicar las fotos en el navegador (sin que el alumno haga nada); nombres crypto.randomUUID() + extensión (.jpg para JPEG); pasar p_apuntes como lista y el nombre del comprobante en p_comprobante_url; probar desde el navegador que la regla de subida de anon funcione (en el panel de Supabase no se aplica).
 A5. Antiabuso (decisión 8): captcha y límite de reservas pendientes por teléfono.
 A6. Pruebas de concurrencia (dos reservas a la vez sobre el último lugar) y de reservas de varias horas.
 Fase B: vencimiento de pendientes
@@ -94,7 +97,7 @@ Fase E: chat con Gemini
 E1. Clave de la API de Gemini como variable de entorno SECRETA (sin NEXT_PUBLIC_), llamada solo desde el servidor. Verificar los límites del plan gratuito.
 E2. Al confirmar una reserva: crear el chat con el prompt de sistema y los apuntes del alumno (PDF, Word o imagen) y guardar el historial en chats.
 E3. Interfaz de chat en el panel para que la profesora siga pidiendo ajustes ("más fácil", "agregá un ejemplo").
-E4. Aviso a los 30 días y botón de borrado manual (borra el chat y, si corresponde, los archivos).
+E4. Aviso a los 30 días y limpieza manual de mitad de mes desde el panel: borra los chats y los datos de alumnos vencidos con sus archivos y, además, los archivos de los buckets apuntes y comprobantes que no aparezcan en ninguna reserva (huérfanos). Los archivos se borran con la API de Storage (supabase.storage.from(bucket).remove([...])), nunca con DELETE sobre storage.objects. Antes de borrar, la pantalla muestra cuántos archivos y cuántos MB se liberan.
 E5. Afinar el prompt de sistema con apuntes reales y con la profesora.
 Fase F: operación y entrega
 F1. Ping anti-pausa de Supabase con GitHub Actions cada 3 o 4 días (el plan gratuito pausa los proyectos inactivos durante una semana). Es el único keep-alive necesario si el hosting es Netlify.
