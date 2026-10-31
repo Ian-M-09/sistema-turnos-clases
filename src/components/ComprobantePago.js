@@ -2,14 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { achicarImagen, formatearMB, MAX_COMPROBANTE, TIPOS_COMPROBANTE } from "@/lib/archivos";
 
 // El depósito por hora, el CBU, el alias y el titular ya no están escritos
 // acá: se leen de la tabla configuracion de Supabase. Así los datos reales
 // de la cuenta no quedan en el repo público y la profesora los puede
 // cambiar sin tocar el código.
 
-export default function ComprobantePago({ minutos, onConfirmar }) {
+export default function ComprobantePago({ minutos, onConfirmar, enviando, errorEnvio }) {
+    // enviando: true mientras page.js sube los archivos y guarda la reserva.
+    // errorEnvio: el mensaje de error que devolvió ese guardado (o null).
     const [comprobante, setComprobante] = useState(null);
+    const [errorArchivo, setErrorArchivo] = useState(null);
+    const [procesando, setProcesando] = useState(false);
     const [config, setConfig] = useState(null);
     // config guarda la fila de configuracion; null mientras no llegó.
     const [errorCarga, setErrorCarga] = useState(null);
@@ -50,8 +55,38 @@ export default function ComprobantePago({ minutos, onConfirmar }) {
     // Math.round redondea al entero más cercano, por si la cuenta da decimales.
     // Es solo para mostrar: el monto que se guarda lo calcula la base (A2).
 
+    async function handleComprobanteChange(e) {
+        const elegido = e.target.files[0];
+        setComprobante(null);
+        setErrorArchivo(null);
+        if (!elegido) return;
+        // Si el alumno abrió el selector y lo cerró sin elegir, no hay archivo.
+
+        if (!TIPOS_COMPROBANTE.includes(elegido.type)) {
+            setErrorArchivo("El comprobante tiene que ser PDF o una foto (JPG, PNG o WebP).");
+            e.target.value = "";
+            return;
+        }
+
+        setProcesando(true);
+        const achicado = await achicarImagen(elegido);
+        // Si es una foto la achica; si es PDF la devuelve igual.
+        setProcesando(false);
+
+        if (achicado.size > MAX_COMPROBANTE) {
+            setErrorArchivo(`El comprobante pesa ${formatearMB(achicado.size)} MB y el máximo es 2 MB.`);
+            e.target.value = "";
+            return;
+        }
+        setComprobante(achicado);
+    }
+
     function handleSubmit(e) {
         e.preventDefault();
+        if (!comprobante) {
+            setErrorArchivo("Subí el comprobante de la transferencia.");
+            return;
+        }
         onConfirmar({ comprobante });
     }
 
@@ -91,18 +126,33 @@ export default function ComprobantePago({ minutos, onConfirmar }) {
             <input
             id="comprobante"
             type="file"
-            accept=".pdf,image/*"
-            onChange={(e) => setComprobante(e.target.files[0])}
+            accept=".pdf,image/jpeg,image/png,image/webp"
+            onChange={handleComprobanteChange}
+            disabled={procesando || enviando}
             className="border border-borde rounded-lg px-3 py-2 bg-superficie"
             required
             />
+            {procesando && <p className="text-sm mt-1">Preparando foto...</p>}
         </div>
+
+        {(errorArchivo || errorEnvio) && (
+            <p role="alert" className="text-red-700 font-medium">
+            {errorArchivo || errorEnvio}
+            </p>
+            // "a || b" da a si tiene valor; si no, da b. Primero mostramos el
+            // error del archivo y, si no hay, el del guardado.
+        )}
 
         <button
             type="submit"
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+            disabled={procesando || enviando}
+            // disabled: mientras se envía no se puede tocar de nuevo, así no
+            // se crean dos reservas por un doble clic.
+            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
         >
-            Confirmar reserva
+            {enviando ? "Enviando..." : "Confirmar reserva"}
+            {/* condición ? siPasa : siNo  es el "operador ternario": un if
+                corto que devuelve un valor. */}
         </button>
         </form>
     );

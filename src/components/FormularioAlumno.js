@@ -7,8 +7,10 @@ import { useState } from "react";
     // "import" trae código de otro archivo o librería para poder usarlo acá.
     // { useState } son "named imports": tomamos específicamente la función
     // useState de todo lo que ofrece la librería "react".
+import { achicarImagen, formatearMB, MAX_APUNTES, TIPOS_APUNTES } from "@/lib/archivos";
+    // Las funciones y límites de archivos están en src/lib/archivos.js.
 
-export default function FormularioAlumno({ turno, onContinuar }) {
+export default function FormularioAlumno({ turno, datosIniciales, onContinuar }) {
     // "export" hace que esta función se pueda importar desde otros archivos.
     // "default" indica que es la exportación principal de este archivo
     // (por eso en page.js la importamos sin llaves: import FormularioAlumno).
@@ -16,16 +18,69 @@ export default function FormularioAlumno({ turno, onContinuar }) {
     // { turno, onContinuar } es "destructuring": de todas las props que le
     // llegan a este componente, extraemos solo estas dos por nombre.
 
-    const [nombre, setNombre] = useState("");
+    const inicial = datosIniciales ?? {};
+    // datosIniciales trae lo que el alumno ya había escrito (por ejemplo,
+    // si volvió a elegir otro horario), así no tiene que tipear todo de nuevo.
+    // "??" significa "si lo de la izquierda es null o undefined, usá lo de
+    // la derecha": la primera vez usamos un objeto vacío.
+
+    const [nombre, setNombre] = useState(inicial.nombre ?? "");
     // "const" declara una variable que no se puede reasignar directamente
     // (no podés escribir nombre = "otra cosa" más adelante, solo a través
-    // de setNombre). useState("") crea el estado inicial vacío.
-    const [apellido, setApellido] = useState("");
-    const [telefono, setTelefono] = useState("");
-    const [materia, setMateria] = useState("");
-    const [anioCursando, setAnioCursando] = useState("");
-    const [notas, setNotas] = useState("");
-    const [archivo, setArchivo] = useState(null);
+    // de setNombre). useState(...) crea el estado con su valor inicial.
+    const [apellido, setApellido] = useState(inicial.apellido ?? "");
+    const [telefono, setTelefono] = useState(inicial.telefono ?? "");
+    const [materia, setMateria] = useState(inicial.materia ?? "");
+    const [anioCursando, setAnioCursando] = useState(inicial.anioCursando ?? "");
+    const [notas, setNotas] = useState(inicial.notas ?? "");
+    const [apuntes, setApuntes] = useState(inicial.apuntes ?? []);
+    // Ahora es una LISTA de archivos (puede quedar vacía: son opcionales).
+    const [error, setError] = useState(null);
+    // Mensaje de error para mostrar en pantalla (reemplaza a los alert()).
+    const [procesando, setProcesando] = useState(false);
+    // true mientras se achican las fotos recién elegidas.
+
+    const bytesUsados = apuntes.reduce((total, a) => total + a.size, 0);
+    // .reduce recorre la lista acumulando un resultado: arranca en 0 y a
+    // cada paso le suma el tamaño (size, en bytes) de un archivo.
+
+    async function handleApuntesChange(e) {
+        const elegidos = Array.from(e.target.files);
+        // e.target.files no es una lista común: Array.from la convierte en
+        // una para poder usar .map, .filter, etc.
+        e.target.value = "";
+        // Vaciamos el input para que se pueda volver a elegir el mismo
+        // archivo después de quitarlo. Los archivos ya quedaron en "elegidos".
+        setError(null);
+
+        const invalidos = elegidos.filter((a) => !TIPOS_APUNTES.includes(a.type));
+        // .filter se queda solo con los elementos que cumplen la condición.
+        if (invalidos.length > 0) {
+            setError(`"${invalidos[0].name}" no es PDF, foto (JPG, PNG o WebP) ni Word (.docx).`);
+            return;
+        }
+
+        setProcesando(true);
+        const achicados = await Promise.all(elegidos.map(achicarImagen));
+        // .map llama a achicarImagen con cada archivo y devuelve una lista
+        // de Promesas. Promise.all espera a que terminen TODAS.
+        setProcesando(false);
+
+        const nuevoTotal = bytesUsados + achicados.reduce((t, a) => t + a.size, 0);
+        if (nuevoTotal > MAX_APUNTES) {
+            setError(`Los apuntes no pueden sumar más de 3 MB (quedarían ${formatearMB(nuevoTotal)} MB).`);
+            return;
+        }
+        setApuntes([...apuntes, ...achicados]);
+        // Armamos una lista NUEVA con los anteriores y los nuevos. En React
+        // nunca se modifica el estado directamente (con .push): se reemplaza.
+    }
+
+    function quitarApunte(indice) {
+        setApuntes(apuntes.filter((_, i) => i !== indice));
+        // Nos quedamos con todos menos el de esa posición. "_" es un nombre
+        // de costumbre para un parámetro que no usamos.
+    }
 
     function handleTelefonoChange(e) {
         // Esta función se ejecuta cada vez que el usuario tipea en el input
@@ -54,13 +109,14 @@ export default function FormularioAlumno({ turno, onContinuar }) {
         // "if" ejecuta el código de adentro solo si la condición es
         // verdadera. "!==" significa "distinto de" (comparación estricta,
         // sin conversión de tipos).
-        alert("El teléfono debe tener exactamente 10 dígitos.");
+        setError("El teléfono debe tener exactamente 10 dígitos.");
+        // Ya no usamos alert(): guardamos el mensaje y se muestra abajo.
         return;
         // "return" corta la ejecución de la función acá mismo: si el
         // teléfono está mal, no seguimos, y "onContinuar" nunca se llama.
         }
 
-        onContinuar({ nombre, apellido, telefono, materia, anioCursando, notas, archivo });
+        onContinuar({ nombre, apellido, telefono, materia, anioCursando, notas, apuntes });
         // Le "avisamos" al componente padre (page.js) que este paso terminó,
         // mandándole todos los datos juntos en un solo objeto.
     }
@@ -173,20 +229,58 @@ export default function FormularioAlumno({ turno, onContinuar }) {
         </div>
 
         <div className="flex flex-col text-left">
-            <label htmlFor="archivo" className="mb-1 font-medium">
-            Apuntes de la materia (PDF, foto o Word)
+            <label htmlFor="apuntes" className="mb-1 font-medium">
+            Apuntes de la materia (PDF, foto o Word, opcional)
             </label>
             <input
-            id="archivo"
+            id="apuntes"
             type="file"
-            accept=".pdf,.doc,.docx,image/*"
-            onChange={(e) => setArchivo(e.target.files[0])}
+            multiple
+            // "multiple" deja elegir varios archivos a la vez.
+            accept=".pdf,.docx,image/jpeg,image/png,image/webp"
+            onChange={handleApuntesChange}
+            disabled={procesando}
             className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             />
+            {procesando && <p className="text-sm mt-1">Preparando fotos...</p>}
+            {/* "&&": si lo de la izquierda es true, muestra lo de la derecha. */}
+
+            {apuntes.length > 0 && (
+            <ul className="mt-2 flex flex-col gap-1">
+                {apuntes.map((a, i) => (
+                // key: React necesita un identificador único por elemento de
+                // la lista para saber cuál cambió.
+                <li key={`${a.name}-${i}`} className="flex justify-between items-center gap-2 text-sm">
+                    <span className="truncate">
+                    {a.name} ({formatearMB(a.size)} MB)
+                    </span>
+                    <button
+                    type="button"
+                    // type="button" para que NO envíe el formulario.
+                    onClick={() => quitarApunte(i)}
+                    className="underline shrink-0"
+                    >
+                    Quitar
+                    </button>
+                </li>
+                ))}
+            </ul>
+            )}
+            <p className="text-sm mt-1">
+            Usado: {formatearMB(bytesUsados)} MB de 3 MB
+            </p>
         </div>
+
+        {error && (
+            // role="alert" hace que los lectores de pantalla lean el mensaje.
+            <p role="alert" className="text-red-700 font-medium">
+            {error}
+            </p>
+        )}
 
         <button
             type="submit"
+            disabled={procesando}
             className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
         >
             Continuar
