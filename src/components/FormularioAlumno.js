@@ -24,14 +24,14 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
     // "??" significa "si lo de la izquierda es null o undefined, usá lo de
     // la derecha": la primera vez usamos un objeto vacío.
 
-    const [nombre, setNombre] = useState(inicial.nombre ?? "");
-    // "const" declara una variable que no se puede reasignar directamente
-    // (no podés escribir nombre = "otra cosa" más adelante, solo a través
-    // de setNombre). useState(...) crea el estado con su valor inicial.
-    const [apellido, setApellido] = useState(inicial.apellido ?? "");
-    const [telefono, setTelefono] = useState(inicial.telefono ?? "");
-    const [materia, setMateria] = useState(inicial.materia ?? "");
+    // Nombre, apellido y teléfono ya no se piden: los cargó el profesor al
+    // registrar al alumno, y crear_reserva los toma de la tabla alumnos
+    // con el DNI. La materia se elige en el primer paso.
+
     const [anioCursando, setAnioCursando] = useState(inicial.anioCursando ?? "");
+    // "const" declara una variable que no se puede reasignar directamente
+    // (no podés escribir anioCursando = "otra cosa" más adelante, solo a
+    // través de setAnioCursando). useState(...) crea el estado con su valor inicial.
     const [notas, setNotas] = useState(inicial.notas ?? "");
     const [apuntes, setApuntes] = useState(inicial.apuntes ?? []);
     // Ahora es una LISTA de archivos (puede quedar vacía: son opcionales).
@@ -82,22 +82,6 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         // de costumbre para un parámetro que no usamos.
     }
 
-    function handleTelefonoChange(e) {
-        // Esta función se ejecuta cada vez que el usuario tipea en el input
-        // de teléfono. La armamos aparte (en vez de ponerla directo en el
-        // onChange) porque tiene más de una línea de lógica adentro.
-
-        const soloNumeros = e.target.value.replace(/[^0-9]/g, "");
-        // "e.target.value" es lo que el usuario tiene escrito en este momento.
-        // .replace(/[^0-9]/g, "") usa una expresión regular para borrar
-        // cualquier caracter que NO sea un número (letras, espacios, guiones).
-        // Así, aunque alguien pegue "011-4444-5555", queda solo "01144445555".
-
-        setTelefono(soloNumeros.slice(0, 10));
-        // .slice(0, 10) corta el texto para que como máximo tenga 10
-        // caracteres, sin importar cuántos números haya escrito o pegado.
-    }
-
     function handleSubmit(e) {
         e.preventDefault();
         // "e" es el "evento" que dispara el navegador al enviar el formulario.
@@ -105,18 +89,7 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         // navegador (que sería recargar la página), para manejarlo nosotros
         // con JavaScript en su lugar.
 
-        if (telefono.length !== 10) {
-        // "if" ejecuta el código de adentro solo si la condición es
-        // verdadera. "!==" significa "distinto de" (comparación estricta,
-        // sin conversión de tipos).
-        setError("El teléfono debe tener exactamente 10 dígitos.");
-        // Ya no usamos alert(): guardamos el mensaje y se muestra abajo.
-        return;
-        // "return" corta la ejecución de la función acá mismo: si el
-        // teléfono está mal, no seguimos, y "onContinuar" nunca se llama.
-        }
-
-        onContinuar({ nombre, apellido, telefono, materia, anioCursando, notas, apuntes });
+        onContinuar({ anioCursando, notas, apuntes });
         // Le "avisamos" al componente padre (page.js) que este paso terminó,
         // mandándole todos los datos juntos en un solo objeto.
     }
@@ -125,82 +98,6 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         // "return" acá indica qué HTML/JSX va a mostrar este componente
         // en pantalla.
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
-        <div className="flex flex-col text-left">
-            <label htmlFor="nombre" className="mb-1 font-medium">
-            Nombre
-            </label>
-            <input
-            id="nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
-            required
-            />
-        </div>
-
-        <div className="flex flex-col text-left">
-            <label htmlFor="apellido" className="mb-1 font-medium">
-            Apellido
-            </label>
-            <input
-            id="apellido"
-            type="text"
-            value={apellido}
-            onChange={(e) => setApellido(e.target.value)}
-            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
-            required
-            />
-        </div>
-
-        <div className="flex flex-col text-left">
-            <label htmlFor="telefono" className="mb-1 font-medium">
-            Teléfono (10 dígitos)
-            </label>
-            <input
-            id="telefono"
-            type="tel"
-            // type="tel" hace que en celulares aparezca el teclado numérico.
-            inputMode="numeric"
-            // inputMode es un refuerzo extra para que el teclado que aparece
-            // sea el de números, independientemente del "type".
-            value={telefono}
-            onChange={handleTelefonoChange}
-            maxLength={10}
-            // maxLength bloquea a nivel navegador que se escriban más de
-            // 10 caracteres, aunque ya lo controlamos también en JS arriba.
-            className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
-            required
-            />
-        </div>
-
-        <div className="flex flex-col text-left">
-            <label htmlFor="materia" className="mb-1 font-medium">
-            Materia
-            </label>
-            <select
-                id="materia"
-                value={materia}
-                onChange={(e) => setMateria(e.target.value)}
-                className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
-                required
-            >
-            {/* <select> muestra una lista deplegable. Cada <option> de adentro es una opcion elegible. el "value"
-            del select sigue funcionando igual que con un input de texto: se actualiza con onChance */}
-            <option value="">Elegí una materia</option>
-            {/*esta opcion vacia fuerza a que el alumno elija algo a proposito,
-            en vez de que quede seleccionada la primer materia por defecto */}
-            <option value="Lengua">Lengua</option>
-            <option value="Matemática">Matemática</option>
-            <option value="Preparación Global 5to (BHM)">Preparación para el Global de 5to (BHM)</option>
-            <option value="Inglés">Inglés</option>
-            <option value="Latín">Latín</option>
-            <option value="Griego">Griego</option>
-            <option value="Dibujo">Dibujo</option>
-            <option value="Apoyo con tareas">Apoyo con tareas</option>
-            </select>
-        </div>
-
         <div className="flex flex-col text-left">
             <label htmlFor="anioCursando" className="mb-1 font-medium">
             Año que está cursando

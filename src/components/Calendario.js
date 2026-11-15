@@ -53,7 +53,9 @@ function textoDuracion(minutos) {
   return `${horas} h ${resto} min`;
 }
 
-export default function Calendario({ onConfirmarHorarios }) {
+export default function Calendario({ onConfirmarHorarios, sinLugares }) {
+  // sinLugares: true si el alumno está bloqueado (verificar_alumno, 009).
+  // Le mostramos todo como si no quedara lugar, sin decirle por qué.
   const hoy = new Date();
   // new Date() sin argumentos crea la fecha y hora de este momento.
 
@@ -102,8 +104,9 @@ export default function Calendario({ onConfirmarHorarios }) {
         // invertidas ` ` permiten meter variables con ${ }).
         // Sin zona horaria escrita, JavaScript lo toma en la hora local
         // del navegador. .getTime() lo pasa a milisegundos para comparar.
-        return hayLugar && momentoClase >= limite;
-        // && exige que se cumplan las dos condiciones a la vez.
+        return !sinLugares && hayLugar && momentoClase >= limite;
+        // && exige que se cumplan todas las condiciones a la vez. Con
+        // sinLugares en true, ninguna fila pasa el filtro.
       });
 
       const agrupado = [];
@@ -130,7 +133,9 @@ export default function Calendario({ onConfirmarHorarios }) {
     }
 
     cargarDisponibilidad();
-  }, []);
+  }, [sinLugares]);
+  // [sinLugares]: el efecto usa esta prop, así que va en la lista. Si
+  // cambiara, React volvería a cargar los horarios.
 
   const primerDiaDelMes = new Date(anio, mes, 1);
   const diasEnElMes = new Date(anio, mes + 1, 0).getDate();
@@ -292,7 +297,7 @@ export default function Calendario({ onConfirmarHorarios }) {
           onClick={() => cambiarMes(-1)}
           disabled={!puedeRetroceder}
           aria-label="Mes anterior"
-          className="px-3 py-1 rounded-lg border border-borde bg-rosa-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
         >
           ←
         </button>
@@ -309,7 +314,7 @@ export default function Calendario({ onConfirmarHorarios }) {
           onClick={() => cambiarMes(1)}
           disabled={!puedeAvanzar}
           aria-label="Mes siguiente"
-          className="px-3 py-1 rounded-lg border border-borde bg-rosa-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
         >
           →
         </button>
@@ -324,6 +329,14 @@ export default function Calendario({ onConfirmarHorarios }) {
         <span>Vie</span>
         <span>Sáb</span>
       </div>
+
+      {disponibilidad.length === 0 && (
+        <p className="mb-4">
+          Por ahora no hay horarios disponibles. Volvé a mirar en unos días.
+        </p>
+        // Se ve cuando no queda ningún horario con lugar (o el alumno está
+        // bloqueado: ve exactamente lo mismo).
+      )}
 
       <div className="grid grid-cols-7 gap-2">
         {espaciosVacios.map((_, i) => (
@@ -345,7 +358,7 @@ export default function Calendario({ onConfirmarHorarios }) {
                   seleccionado
                     ? "bg-acento border-acento text-white"
                     : disponible
-                      ? "bg-rosa-suave border-borde text-acento-hover font-medium hover:bg-borde cursor-pointer"
+                      ? "bg-suave border-borde text-acento-hover font-medium hover:bg-borde cursor-pointer"
                       : "bg-fondo border-transparent text-texto/30 cursor-not-allowed"
                 }
               `}
@@ -372,7 +385,7 @@ export default function Calendario({ onConfirmarHorarios }) {
                   className={`border rounded-lg px-3 py-2 font-medium ${
                     elegido
                       ? "bg-acento border-acento text-white"
-                      : "bg-rosa-suave border-borde text-acento-hover hover:bg-borde"
+                      : "bg-suave border-borde text-acento-hover hover:bg-borde"
                   }`}
                 >
                   {/* aria-pressed le avisa a los lectores de pantalla que el
@@ -407,7 +420,7 @@ export default function Calendario({ onConfirmarHorarios }) {
                     className={`border rounded-lg px-4 py-2 font-medium ${
                       bloquesElegidos === o.bloques
                         ? "bg-acento border-acento text-white"
-                        : "bg-rosa-suave border-borde text-acento-hover hover:bg-borde"
+                        : "bg-suave border-borde text-acento-hover hover:bg-borde"
                     }`}
                   >
                     {textoDuracion(o.minutos)}

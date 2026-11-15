@@ -13,7 +13,25 @@
   --acento-hover: #8a3649;
   /* Un escalón más oscuro, para el estado hover. */
   --aviso: #b77f87;
-  --rosa-suave: #f4d4da;
+  --suave: #f4d4da;
+  /* Antes se llamaba --rosa-suave. Ahora es "suave" porque en el tema
+     azul este color no es rosa. */
+}
+
+/* Tema azul: las materias del profesor. Cuando la página pone
+   data-tema="azul" en la etiqueta <html>, estas variables reemplazan a
+   las de arriba y TODA la página cambia de color (Tailwind usa estas
+   mismas variables). [data-tema="azul"] es un "selector de atributo":
+   elige los elementos que tengan ese atributo con ese valor. */
+:root[data-tema="azul"] {
+  --fondo: #e6edf5;
+  /* Gris azulado claro, el equivalente frío del crema. */
+  --texto: #4d6683;
+  --borde: #b3c7dd;
+  --acento: #2f5f8f;
+  --acento-hover: #224a72;
+  --aviso: #6f8fb3;
+  --suave: #d4e2f1;
 }
 
 @theme inline {
@@ -24,19 +42,22 @@
   --color-acento: var(--acento);
   --color-acento-hover: var(--acento-hover);
   --color-aviso: var(--aviso);
-  --color-rosa-suave: var(--rosa-suave);
+  --color-suave: var(--suave);
 }
 
 body {
   background: var(--fondo);
   color: var(--texto);
+  transition: background-color 0.4s ease, color 0.4s ease;
+  /* transition: cuando cambia el tema, el fondo y el texto pasan de un
+     color al otro en 0.4 segundos en vez de cambiar de golpe. */
   font-family: var(--font-work-sans), sans-serif;
   /* Acá sí referenciamos la variable real de next/font directamente,
      no un alias de @theme. */
 }
 
 h1, h2, h3 {
-  font-family: var(--font-lora), serif;
+  font-family: var(--font-montserrat), sans-serif;
   /* Mismo criterio: variable real, no el alias que no se exportaba. */
 }
 

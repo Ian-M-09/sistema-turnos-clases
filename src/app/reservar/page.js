@@ -1,15 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import IdentificacionAlumno from "@/components/IdentificacionAlumno";
 import Calendario from "@/components/Calendario";
 import FormularioAlumno from "@/components/FormularioAlumno";
 import ComprobantePago from "@/components/ComprobantePago";
+import Ubicacion from "@/components/Ubicacion";
 import { supabase } from "@/lib/supabase";
 import { subirArchivo } from "@/lib/archivos";
 
 export default function Reservar() {
-    const [paso, setPaso] = useState("calendario"); // "calendario" | "datos" | "pago" | "listo"
+    const [paso, setPaso] = useState("identificacion"); // "identificacion" | "calendario" | "datos" | "pago" | "listo"
+    const [alumno, setAlumno] = useState(null);
+    // { dni, materia, profesorId, nombreAlumno, habilitado }, del primer paso.
+    const [tema, setTema] = useState("rosa");
+    // "rosa" (profesora) o "azul" (profesor). Cambia apenas se elige la materia.
     const [turnoElegido, setTurnoElegido] = useState(null);
     const [datosAlumno, setDatosAlumno] = useState(null);
     const [enviando, setEnviando] = useState(false);
@@ -18,6 +24,24 @@ export default function Reservar() {
     const [sinLugar, setSinLugar] = useState(false);
     // true si el error fue porque alguien ocupó el último lugar: ahí
     // mostramos un botón para volver a elegir horario.
+
+    useEffect(() => {
+        document.documentElement.dataset.tema = tema;
+        // document.documentElement es la etiqueta <html> de la página.
+        // .dataset.tema = "azul" le pone el atributo data-tema="azul", y el
+        // CSS de globals.css cambia todos los colores.
+        return () => {
+            delete document.documentElement.dataset.tema;
+        };
+        // La función que devuelve un useEffect es la "limpieza": React la
+        // ejecuta antes de volver a correr el efecto y cuando el alumno se
+        // va de /reservar. Así la página de inicio vuelve a ser rosa.
+    }, [tema]);
+
+    function handleIdentificado(datos) {
+        setAlumno(datos);
+        setPaso("calendario");
+    }
 
     function handleConfirmarHorarios(fecha, horarios, resumen, minutosTotales) {
         // Ahora recibe el día, la LISTA de horarios (cada uno con su id), el
@@ -53,17 +77,16 @@ export default function Reservar() {
             // 2. Subir el comprobante.
             const nombreComprobante = await subirArchivo("comprobantes", comprobante);
 
-            // 3. Llamar a la función crear_reserva de la base (008). Ella
-            // valida todo de nuevo y guarda la reserva, todo o nada.
+            // 3. Llamar a la función crear_reserva de la base (009). Ella
+            // valida todo de nuevo y guarda la reserva, todo o nada. El
+            // nombre, apellido y teléfono los saca de la tabla alumnos con el DNI.
             const { error } = await supabase.rpc("crear_reserva", {
                 // .rpc("nombre", { parámetros }) ejecuta una función SQL. Los
                 // nombres de las claves tienen que ser iguales a los de la función.
                 p_horarios: turnoElegido.horarios.map((h) => h.id),
                 // De cada horario elegido nos quedamos solo con su id.
-                p_nombre: datosAlumno.nombre,
-                p_apellido: datosAlumno.apellido,
-                p_telefono: datosAlumno.telefono,
-                p_materia: datosAlumno.materia,
+                p_dni: alumno.dni,
+                p_materia: alumno.materia,
                 p_anio_cursando: datosAlumno.anioCursando,
                 p_notas: datosAlumno.notas,
                 p_apuntes: nombresApuntes,
@@ -99,8 +122,34 @@ export default function Reservar() {
         <main className="flex flex-col items-center justify-center flex-1 text-center p-4 sm:p-8 gap-6">
         <h1 className="text-3xl font-bold">Reservar un turno</h1>
 
+        {paso === "identificacion" && (
+            <IdentificacionAlumno
+                datosIniciales={alumno}
+                onCambiarTema={setTema}
+                // Le pasamos directamente setTema: el hijo la llama con
+                // "rosa" o "azul" cuando cambia la materia.
+                onContinuar={handleIdentificado}
+            />
+        )}
+
         {paso === "calendario" && (
-            <Calendario onConfirmarHorarios={handleConfirmarHorarios} />
+            <>
+            <p className="text-lg">
+                Hola, <strong>{alumno.nombreAlumno}</strong>. Clase de{" "}
+                <strong>{alumno.materia}</strong>.
+            </p>
+            <button
+                onClick={() => setPaso("identificacion")}
+                className="underline"
+            >
+                Cambiar DNI o materia
+            </button>
+            <Calendario
+                onConfirmarHorarios={handleConfirmarHorarios}
+                sinLugares={!alumno.habilitado}
+                // Un alumno bloqueado ve todos los horarios sin lugar.
+            />
+            </>
         )}
 
         {paso === "datos" && (
@@ -130,6 +179,8 @@ export default function Reservar() {
             {/* <> ... </> es un "Fragment": agrupa varios elementos sin
                 agregar una etiqueta extra al HTML. */}
             <ComprobantePago
+                profesorId={alumno.profesorId}
+                // La cuenta y el precio son los del profesor de la materia.
                 minutos={turnoElegido.minutosTotales}
                 onConfirmar={handleConfirmarPago}
                 enviando={enviando}
@@ -155,10 +206,13 @@ export default function Reservar() {
         )}
 
         {paso === "listo" && (
+            <>
             <p className="text-lg">
-            ¡Listo! Tu turno quedó pendiente de confirmación por parte de la
-            profesora.
+            ¡Listo! Tu turno quedó pendiente de confirmación. Te van a avisar
+            por WhatsApp cuando esté confirmado.
             </p>
+            <Ubicacion />
+            </>
         )}
 
         {paso !== "listo" && !enviando && (

@@ -1,10 +1,11 @@
-import { Lora, Work_Sans } from "next/font/google";
-// Antes importábamos Geist y Geist_Mono. Las cambiamos por estas dos.
+import { Montserrat, Work_Sans } from "next/font/google";
+// Montserrat (geométrica, sans-serif) reemplaza a Lora en los títulos.
+// Work Sans sigue en los textos.
 import "./globals.css";
 
-const lora = Lora({
-  variable: "--font-lora",
-  // Esto crea la variable CSS --font-lora, que usamos en globals.css.
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  // Esto crea la variable CSS --font-montserrat, que usamos en globals.css.
   subsets: ["latin"],
 });
 
@@ -22,7 +23,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" className="h-full antialiased"  >
 
-      <body className={`${lora.variable} ${workSans.variable} antialiased`}>{children}
+      <body className={`${montserrat.variable} ${workSans.variable} antialiased`}>{children}
         <footer className="border-t border-borde mt-auto py-6 text-center text-sm text-texto/70">
           <p>
             Desarrollado por{" "}

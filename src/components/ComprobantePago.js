@@ -4,29 +4,34 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { achicarImagen, formatearMB, MAX_COMPROBANTE, TIPOS_COMPROBANTE } from "@/lib/archivos";
 
-// El depósito por hora, el CBU, el alias y el titular ya no están escritos
-// acá: se leen de la tabla configuracion de Supabase. Así los datos reales
-// de la cuenta no quedan en el repo público y la profesora los puede
-// cambiar sin tocar el código.
+// El precio por hora, el CBU, el alias y el titular ya no están escritos
+// acá: se leen de la tabla profesores de Supabase (009), de la fila del
+// profesor que da la materia elegida. Así los datos reales de la cuenta
+// no quedan en el repo público y cada profesor los puede cambiar sin
+// tocar el código.
 
-export default function ComprobantePago({ minutos, onConfirmar, enviando, errorEnvio }) {
+export default function ComprobantePago({ profesorId, minutos, onConfirmar, enviando, errorEnvio }) {
+    // profesorId: el profesor de la materia (1 la profesora, 2 el profesor).
     // enviando: true mientras page.js sube los archivos y guarda la reserva.
     // errorEnvio: el mensaje de error que devolvió ese guardado (o null).
     const [comprobante, setComprobante] = useState(null);
     const [errorArchivo, setErrorArchivo] = useState(null);
     const [procesando, setProcesando] = useState(false);
     const [config, setConfig] = useState(null);
-    // config guarda la fila de configuracion; null mientras no llegó.
+    // config guarda la fila del profesor; null mientras no llegó.
     const [errorCarga, setErrorCarga] = useState(null);
 
     useEffect(() => {
-        async function cargarConfiguracion() {
+        async function cargarProfesor() {
             const { data, error } = await supabase
-                .from("configuracion")
-                .select("deposito_por_hora, cbu, alias, titular")
+                .from("profesores")
+                .select("precio_por_hora, cbu, alias, titular")
+                .eq("id", profesorId)
+                // .eq("columna", valor): solo la fila donde id es igual a
+                // profesorId ("eq" viene de "equal", igual).
                 .single();
             // .single() pide exactamente una fila y la devuelve como objeto
-            // (no como lista). La tabla siempre tiene una sola fila.
+            // (no como lista).
 
             if (error) {
                 setErrorCarga("No se pudieron cargar los datos de pago. Probá de nuevo más tarde.");
@@ -35,8 +40,9 @@ export default function ComprobantePago({ minutos, onConfirmar, enviando, errorE
             setConfig(data);
         }
 
-        cargarConfiguracion();
-    }, []);
+        cargarProfesor();
+    }, [profesorId]);
+    // [profesorId]: si cambiara el profesor, se vuelve a cargar su cuenta.
 
     if (errorCarga) {
         return <p className="text-center">{errorCarga}</p>;
@@ -46,11 +52,11 @@ export default function ComprobantePago({ minutos, onConfirmar, enviando, errorE
         // "!config" es true cuando config todavía es null.
     }
 
-    const depositoPorHora = Number(config.deposito_por_hora);
+    const precioPorHora = Number(config.precio_por_hora);
     // Supabase devuelve las columnas numeric como texto ("15000.00") para
     // no perder precisión. Number() lo convierte en número para hacer cuentas.
-    const montoTotal = Math.round((depositoPorHora * minutos) / 60);
-    // El depósito es proporcional al tiempo: para 3 h 30 min (210 minutos)
+    const montoTotal = Math.round((precioPorHora * minutos) / 60);
+    // El pago es proporcional al tiempo: para 3 h 30 min (210 minutos)
     // da 15000 * 210 / 60 = 52500. "*" multiplica y "/" divide.
     // Math.round redondea al entero más cercano, por si la cuenta da decimales.
     // Es solo para mostrar: el monto que se guarda lo calcula la base (A2).
@@ -97,12 +103,12 @@ export default function ComprobantePago({ minutos, onConfirmar, enviando, errorE
         >
         <div className="bg-superficie border border-borde rounded-lg p-4 text-center">
             <p className="font-medium mb-1">
-            Transferir depósito de ${montoTotal.toLocaleString("es-AR")}
+            Transferir el pago de la clase: ${montoTotal.toLocaleString("es-AR")}
             </p>
             {minutos !== 60 && (
             <p className="text-sm mb-1">
                 {(minutos / 60).toLocaleString("es-AR")} horas × $
-                {depositoPorHora.toLocaleString("es-AR")}
+                {precioPorHora.toLocaleString("es-AR")}
             </p>
             )}
             {/* .toLocaleString("es-AR") formatea con estilo argentino: 17500 →
@@ -116,6 +122,15 @@ export default function ComprobantePago({ minutos, onConfirmar, enviando, errorE
             </p>
             <p className="text-sm">
             Nombre: <strong>{config.titular}</strong>
+            </p>
+        </div>
+
+        <div className="bg-suave border border-borde rounded-lg p-3 text-sm">
+            <p className="font-medium mb-1">Política de devolución</p>
+            <p>
+            Si cancelás la clase con más de 24 horas de anticipación, se te
+            devuelve el 100% del pago. Si cancelás con menos de 24 horas, el
+            pago no se devuelve.
             </p>
         </div>
 
