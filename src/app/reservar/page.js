@@ -80,7 +80,7 @@ export default function Reservar() {
             // 3. Llamar a la función crear_reserva de la base (009). Ella
             // valida todo de nuevo y guarda la reserva, todo o nada. El
             // nombre, apellido y teléfono los saca de la tabla alumnos con el DNI.
-            const { error } = await supabase.rpc("crear_reserva", {
+            const { data, error } = await supabase.rpc("crear_reserva", {
                 // .rpc("nombre", { parámetros }) ejecuta una función SQL. Los
                 // nombres de las claves tienen que ser iguales a los de la función.
                 p_horarios: turnoElegido.horarios.map((h) => h.id),
@@ -105,6 +105,13 @@ export default function Reservar() {
                 // Estos tres errores se arreglan eligiendo otro horario.
                 return;
                 // El "finally" de abajo se ejecuta igual aunque hagamos return.
+            }
+
+            if (!data) {
+                // Desde 015, crear_reserva devuelve null (en vez de un error)
+                // cuando el DNI no está registrado, para poder anotar el intento.
+                setErrorEnvio("Ese DNI no está registrado. Escribile a tu profesor para que te registre.");
+                return;
             }
 
             setPaso("listo");
@@ -215,7 +222,10 @@ export default function Reservar() {
             </>
         )}
 
-        {paso !== "listo" && !enviando && (
+        {!enviando && (
+            // Se muestra en todos los pasos (también en "listo", para que el
+            // alumno no tenga que recargar la página) menos mientras se
+            // guarda la reserva, así no se va a la mitad.
             <Link
             href="/"
             className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"

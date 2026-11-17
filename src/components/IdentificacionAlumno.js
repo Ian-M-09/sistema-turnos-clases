@@ -67,12 +67,25 @@ export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, on
         setVerificando(false);
 
         if (error) {
-            setError("No se pudo verificar el DNI. Probá de nuevo.");
+            // Si se pasó el límite de intentos (015), la función manda un
+            // mensaje pensado para el alumno y lo mostramos tal cual.
+            // .includes("texto") da true si error.message contiene ese texto.
+            setError(
+                error.message.includes("demasiados intentos")
+                    ? error.message
+                    : "No se pudo verificar el DNI. Probá de nuevo."
+            );
             return;
         }
         if (!data) {
             // La función devuelve null cuando el DNI no está registrado.
             setError("Ese DNI no está registrado. Escribile a tu profesor para que te registre y después volvé a intentar.");
+            return;
+        }
+        if (data.tiene_pendiente) {
+            // Solo se puede tener 1 reserva esperando confirmación (015).
+            // Avisamos acá para que no elija horario ni suba archivos sin necesidad.
+            setError("Ya tenés una reserva esperando que el profesor la confirme. Cuando la confirme o la rechace vas a poder hacer otra.");
             return;
         }
 

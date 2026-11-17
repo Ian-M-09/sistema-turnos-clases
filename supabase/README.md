@@ -20,6 +20,7 @@ proyecto de Supabase de otra cuenta).
    - `012_reservas_admin.sql`: estado cancelado (con cancelado_en y devolucion); cada profesor lee sus reservas, sus horarios y sus archivos; función cambiar_estado_reserva (confirmar, rechazar, cancelar).
    - `013_alumnos_admin.sql`: los profesores pueden leer, registrar y editar (bloquear) alumnos. No se pueden borrar.
    - `014_mis_datos.sql`: deposito_por_hora pasa a precio_por_hora (y crear_reserva se recrea); cada profesor edita su nombre, precio, CBU, alias y titular; checks de formato del CBU (22 números) y el alias.
+   - `015_antiabuso.sql`: tabla intentos_dni; verificar_alumno y crear_reserva frenan a una IP que probó 10 DNIs inexistentes en 15 minutos; máximo 1 reserva pendiente_pago por alumno (verificar_alumno avisa con tiene_pendiente; crear_reserva devuelve NULL si el DNI no existe).
 
 ## Regla
 Todo cambio nuevo en la base va en un archivo nuevo con el número que
