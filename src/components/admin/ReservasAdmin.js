@@ -2,13 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { linkWhatsApp, mensajeConfirmada, mensajeRechazada, mensajeCancelada } from "@/lib/whatsapp";
+import { linkWhatsApp, mensajeConfirmada, mensajeRechazada, mensajeCancelada, mensajeVencida } from "@/lib/whatsapp";
 
 // Sección "Reservas" del panel. Cada profesor ve solo las de sus materias
 // (lo decide la política de 012, no esta pantalla). Arriba van las
-// pendientes de confirmar y abajo las confirmadas que todavía no pasaron.
+// vencidas que falta devolver (016), después las pendientes de confirmar
+// y abajo las confirmadas que todavía no pasaron.
 
 const MINUTO = 60 * 1000; // un minuto en milisegundos
+const VENTANA_MINUTOS = 30;
+// Minutos para confirmar antes de que la reserva venza. Tiene que ser el
+// mismo valor que en vencer_reservas_pendientes (016_vencimiento.sql).
+
+function minutosRestantes(creadoEn) {
+    // Cuántos minutos le quedan a una pendiente antes de vencer (0 si ya
+    // pasó el tiempo y la base todavía no la venció: tarda hasta 1 minuto).
+    const vence = new Date(creadoEn).getTime() + VENTANA_MINUTOS * MINUTO;
+    return Math.max(0, Math.ceil((vence - Date.now()) / MINUTO));
+    // Math.ceil redondea para arriba (4,2 minutos → 5).
+    // Math.max(0, x): si x es negativo, devuelve 0.
+}
 
 function aMinutos(hora) {
     const [h, m] = hora.split(":").map(Number);
@@ -54,6 +67,7 @@ function prepararReserva(r) {
 }
 
 export default function ReservasAdmin() {
+    const [vencidas, setVencidas] = useState([]);
     const [pendientes, setPendientes] = useState([]);
     const [confirmadas, setConfirmadas] = useState([]);
     const [links, setLinks] = useState({});
@@ -72,13 +86,15 @@ export default function ReservasAdmin() {
             const { data, error } = await supabase
                 .from("reservas")
                 .select(
-                    "id, nombre, apellido, telefono, materia, anio_cursando, notas, apuntes, comprobante_url, monto, estado, creado_en, reserva_horarios(disponibilidad(fecha, hora, duracion_minutos))"
+                    "id, nombre, apellido, telefono, materia, anio_cursando, notas, apuntes, comprobante_url, monto, estado, creado_en, vencida, reserva_horarios(disponibilidad(fecha, hora, duracion_minutos))"
                 )
                 // reserva_horarios(disponibilidad(...)): trae, en la misma
                 // consulta, los horarios de cada reserva y los datos de cada
                 // horario (Supabase sigue las claves foráneas de 004).
-                .in("estado", ["pendiente_pago", "confirmado"])
-                // .in("columna", lista): solo las filas con alguno de esos valores.
+                .or("estado.in.(pendiente_pago,confirmado),and(vencida.eq.true,devuelto_en.is.null)")
+                // .or("a,b"): las filas que cumplen a O b.
+                //   a = estado es pendiente_pago o confirmado.
+                //   b = and(...): vencida Y todavía sin devolver (devuelto_en es null).
                 .order("creado_en");
 
             if (error) {
@@ -89,6 +105,7 @@ export default function ReservasAdmin() {
 
             const ahora = Date.now();
             const todas = data.map(prepararReserva);
+            setVencidas(todas.filter((r) => r.vencida));
             setPendientes(todas.filter((r) => r.estado === "pendiente_pago"));
             setConfirmadas(
                 todas
@@ -166,6 +183,24 @@ export default function ReservasAdmin() {
         // Volvemos a leer la lista con los estados nuevos.
     }
 
+    async function marcarDevuelta(reserva) {
+        const monto = Number(reserva.monto).toLocaleString("es-AR");
+        if (!window.confirm(`¿Ya le devolviste $${monto} a ${reserva.nombre} ${reserva.apellido}?`)) return;
+
+        setTrabajando(reserva.id);
+        setError(null);
+        setAviso(null);
+        const { error } = await supabase.rpc("marcar_devuelta", { p_reserva_id: reserva.id });
+        setTrabajando(null);
+
+        if (error) {
+            setError(error.message);
+            return;
+        }
+        setVersion((v) => v + 1);
+        // Al volver a leer, la reserva ya no aparece (devuelto_en dejó de ser null).
+    }
+
     function dibujarTarjeta(r) {
         // Devuelve el JSX de la tarjeta de una reserva. Es una función común
         // (no un componente): un componente definido adentro de otro se
@@ -204,8 +239,43 @@ export default function ReservasAdmin() {
                 )}
             </div>
 
+            {r.estado === "pendiente_pago" && (
+                <p className="font-medium">
+                {minutosRestantes(r.creado_en) > 0
+                    ? `Vence en ${minutosRestantes(r.creado_en)} min si no la confirmás.`
+                    : "Venciendo..."}
+                </p>
+                // El número se calcula al cargar la lista; no baja solo.
+                // Se actualiza cuando la lista se vuelve a leer.
+            )}
+
             <div className="flex flex-wrap gap-2 mt-1">
-                {r.estado === "pendiente_pago" ? (
+                {r.vencida ? (
+                <>
+                    {r.clase && (
+                    <a
+                        href={linkWhatsApp(
+                            r.telefono,
+                            mensajeVencida({ ...r.clase, nombre: r.nombre }, Number(r.monto).toLocaleString("es-AR"))
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition"
+                    >
+                        WhatsApp
+                    </a>
+                    )}
+                    <button
+                    onClick={() => marcarDevuelta(r)}
+                    disabled={ocupado}
+                    className="border border-borde px-4 py-2 rounded-lg hover:bg-suave transition disabled:opacity-60"
+                    >
+                    Ya devolví la plata
+                    </button>
+                </>
+                ) : r.estado === "pendiente_pago" ? (
+                // a ? b : c ? d : e  es un "if / else if / else" en corto:
+                // primero las vencidas, después las pendientes, y si no, confirmadas.
                 <>
                     <button
                     onClick={() => cambiarEstado(r, "confirmar")}
@@ -270,6 +340,22 @@ export default function ReservasAdmin() {
             <p role="alert" className="text-red-700 font-medium">
             {error}
             </p>
+        )}
+
+        {vencidas.length > 0 && (
+            // Esta sección aparece solo si hay alguna.
+            <section className="flex flex-col gap-3">
+            <h2 className="text-xl font-bold">Vencidas: hay que devolver la plata ({vencidas.length})</h2>
+            <p className="text-sm text-texto/70">
+                No se confirmaron en {VENTANA_MINUTOS} minutos y el lugar se liberó.
+                El alumno ya había pagado: avisale por WhatsApp, devolvele el 100%
+                por transferencia y después tocá &quot;Ya devolví la plata&quot;.
+            </p>
+            {/* &quot; es la forma de escribir comillas dobles dentro del texto de JSX. */}
+            <ul className="flex flex-col gap-3">
+                {vencidas.map(dibujarTarjeta)}
+            </ul>
+            </section>
         )}
 
         <section className="flex flex-col gap-3">

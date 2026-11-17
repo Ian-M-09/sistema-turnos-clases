@@ -41,6 +41,16 @@ export function mensajeRechazada(clase) {
     ].join("\n");
 }
 
+// Para una reserva que el sistema venció porque no se confirmó a tiempo
+// (016). El alumno ya había pagado, así que se le devuelve todo.
+export function mensajeVencida(clase, monto) {
+    return [
+        `Hola ${clase.nombre}, perdón: no llegamos a confirmar a tiempo tu reserva de ${clase.materia} del ${clase.dia} de ${clase.desde} a ${clase.hasta}, y el lugar se liberó.`,
+        "",
+        `Te vamos a devolver el 100% del pago ($${monto}) por transferencia. Si querés, podés volver a reservar en la página.`,
+    ].join("\n");
+}
+
 export function mensajeCancelada(clase, devolucion, monto) {
     const motivo = devolucion
         ? `Como cancelaste con más de 24 horas de anticipación, te vamos a devolver el 100% del pago ($${monto}).`

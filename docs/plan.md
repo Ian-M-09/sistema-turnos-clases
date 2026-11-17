@@ -26,7 +26,7 @@ Estructura: src/app (layout.js, page.js, globals.css, reservar/page.js), src/com
 
 Pantallas: Home con botón "Reservar un turno" y /reservar en 5 pasos (DNI y materia, calendario, datos, comprobante, listo). El paso final sube los archivos a Storage y guarda la reserva con crear_reserva (A4).
 
-Dos profesores (desde 009): la profesora (tema rosa) y un profesor (tema azul) que da Matemática, Álgebra, Programación y Economía. Al elegir una materia del profesor, toda la página pasa a azul (data-tema="azul" en <html>, colores en globals.css) y el comprobante muestra su cuenta y su precio. La reserva guarda profesor_id: la confirma y la recibe ese profesor. Comparten horarios y cupos.
+Dos profesores (desde 009): la profesora (tema rosa) y un profesor, que es Ian (tema azul), que da Matemática, Álgebra, Programación y Economía. Al elegir una materia del profesor, toda la página pasa a azul (data-tema="azul" en <html>, colores en globals.css) y el comprobante muestra su cuenta y su precio. La reserva guarda profesor_id: la confirma y la recibe ese profesor. Comparten horarios y cupos.
 Alumnos registrados (desde 009): los registran los profesores (DNI, nombre, apellido, teléfono; los dos pueden registrar y bloquear). En el primer paso el alumno escribe el DNI y verificar_alumno devuelve solo el nombre y si puede reservar (nunca el teléfono ni el apellido, para que no se puedan juntar datos probando DNIs). Un alumno bloqueado ve todo sin lugar, sin aviso de que está bloqueado. Hasta tener el panel (Fase C), se registran a mano en el Table Editor.
 
 Calendario: mes actual con flechas (hasta 2 meses adelante). Lee disponibilidad de Supabase, oculta los horarios llenos y los que faltan menos de 24 hs. El alumno elige hora de inicio y duración (horas enteras seguidas del mismo día, más una media hora final si está cargada). Muestra "¡Último lugar!" cuando queda 1 lugar.
@@ -56,9 +56,9 @@ Depósito del 50% por hora (proporcional al tiempo: una media hora paga la mitad
 Si el alumno cancela, no se devuelve el depósito.
 Estados: pendiente_pago, luego confirmado o rechazado, decidido manualmente por la profesora. Ventana definida: 30 minutos desde que se sube el comprobante; si no confirma ni rechaza en ese lapso, se libera el cupo y la reserva queda en rechazado (decidido; no hay estado "vencido"). La ventana de 30 minutos se valida con ella (ver decisión 4).
 Validación de pagos: la profesora decide cada reserva y debería confirmar en su cuenta bancaria que la plata llegó antes de confirmar (un comprobante se puede editar). No hay forma automática gratuita y confiable de verificarlo.
-La profesora carga la disponibilidad todas las semanas (los sábados, para la semana siguiente). Recordatorio por email los sábados a la mañana.
+La profesora carga la disponibilidad todas las semanas (los sábados, para la semana siguiente). Recordatorio por Telegram los sábados a la mañana.
 Avisos (decidido):
-A la profesora: email cada vez que llega un comprobante.
+Al profesor de la materia: mensaje de Telegram (con un bot propio, gratis y oficial) cada vez que llega un comprobante (decidido 17/11; reemplaza al email). Se eligió Telegram porque la notificación llega al instante y la ventana para confirmar es de 30 minutos; WhatsApp gratis solo existe con servicios no oficiales (CallMeBot) y el email es fácil de no ver a tiempo. Cada profesor tiene que tener Telegram y escribirle una vez al bot.
 Al alumno: WhatsApp semiautomático con enlaces. Al confirmar o rechazar, el panel abre WhatsApp con el mensaje ya escrito al número del alumno y la profesora toca Enviar. Sin costo y sin aprobación de Meta.
 La API oficial de WhatsApp (automática) queda como mejora futura: Meta cobra por cada mensaje de plantilla entregado (tarifa según país; no se confirmó la de Argentina) y hace falta cuenta de empresa, número dedicado y plantillas aprobadas.
 El teléfono se guarda con 10 dígitos; para armar el enlace de WhatsApp hay que anteponer el prefijo de Argentina (549).
@@ -69,10 +69,10 @@ Objetivo de costo: lo más barato posible (idealmente $0 por mes).
 5. Decisiones abiertas (preguntar, no asumir)
 Hosting: confirmar Netlify con una demo. Hay que verificar que Next.js 16 despliegue bien con su adaptador y vigilar los topes mensuales del plan gratuito (se miden en créditos y, si se pasan, el sitio se pausa hasta el mes siguiente). Alternativas: Render pago (el plan que no se duerme, unos USD 7 por mes según una guía de terceros; el plan gratuito de Render se apaga a los 15 minutos sin tráfico y la primera visita puede tardar cerca de un minuto) o Cloudflare (necesita el adaptador OpenNext, el soporte en Windows no está garantizado, el límite de un Worker gratuito es 3 MiB y no se confirmó compatibilidad con Next.js 16). Con Netlify o Cloudflare, el único ping necesario es el de Supabase.
 Monto real del depósito por hora y CBU y alias reales.
-Ventana de 30 minutos para confirmar. La profesora tendría que mirar el email casi al instante. Revisarlo con ella (es un solo valor configurable).
+Ventana de 30 minutos para confirmar. La profesora tendría que mirar el aviso de Telegram casi al instante. Revisarlo con ella (es un solo valor configurable).
 Quién más puede entrar al panel. Cualquier persona con GitHub puede intentar iniciar sesión, así que hay que restringir el acceso a las cuentas de los dos profesores (lista de permitidos). Cada uno ve y confirma solo las reservas de sus materias; los dos manejan la lista de alumnos. Falta saber si el profesor tiene cuenta de GitHub.
 Diseño de tablas para reservas de varias horas (ver A1).
-Servicio de email para avisarle a la profesora y sus límites gratuitos (verificar al elegirlo).
+Avisos a los profesores: DECIDIDO Telegram (ver Avisos en la sección 4). Verificar los límites del Bot API al implementarlo (para pocos mensajes por día no deberían ser problema).
 Datos personales. Los alumnos probablemente son menores y se guardan nombre, teléfono y archivos. Definir cuánto tiempo se guardan, quién accede y si hace falta un aviso de privacidad (consultarlo con la profesora o un profesional; esto no es asesoramiento legal).
 Antiabuso. Una reserva pendiente ocupa lugares y genera un aviso. Medidas baratas a decidir en la Fase A: un captcha (hay opciones gratuitas, por ejemplo Cloudflare Turnstile; verificarlo al implementar) y un límite de reservas pendientes por teléfono.
 6. Plan de ejecución (en este orden)
@@ -89,7 +89,7 @@ A4. Conectar el paso final de /reservar: subir archivos, llamar a la función y 
 A5. Antiabuso (decisión 8): captcha, límite de reservas pendientes por alumno y límite de intentos de DNI (para que no se puedan probar DNIs al azar en verificar_alumno). DECIDIDO (17/11): límite por IP en la base (10 DNIs inexistentes en 15 minutos, contados en la tabla intentos_dni, también en crear_reserva); máximo 1 reserva pendiente_pago por alumno (se avisa en el primer paso); el captcha queda para la Fase F (necesita servidor y clave secreta). Script: supabase/015_antiabuso.sql. FALTA correrlo en Supabase y probarlo desde el navegador.
 A6. Pruebas de concurrencia (dos reservas a la vez sobre el último lugar) y de reservas de varias horas. Scripts en pruebas/: a6_1_preparar.sql (alumnos DNI 99000001-6 y horarios del 15/03/2028, que el calendario no muestra), a6_2_pruebas.mjs (node --env-file=.env.local pruebas/a6_2_pruebas.mjs; usa la clave pública, igual que el navegador) a6_3_revisar.sql y a6_4_limpiar.sql. YA ESTA HECHO (17/11): 3 alumnos sobre el último lugar → entra 1; el mismo alumno 5 veces a la vez → entra 1; 2 horas y media desordenadas → se guarda; las 8 inválidas dan su error. Si se corre dos veces sin limpiar, el script frena solo. Además, la pantalla final de /reservar ahora tiene el botón "Volver al inicio".
 Fase B: vencimiento de pendientes
-B1. Proceso programado que cada pocos minutos libere los lugares de reservas pendiente_pago vencidas (pg_cron de Supabase o GitHub Actions o cron del hosting; verificar qué está disponible en el plan gratuito).
+B1. Proceso programado que cada pocos minutos libere los lugares de reservas pendiente_pago vencidas (pg_cron de Supabase o GitHub Actions o cron del hosting; verificar qué está disponible en el plan gratuito). DECIDIDO (17/11): pg_cron cada 1 minuto. La vencida queda en rechazado con vencida = true y devolucion = true (el alumno ya pagó); en el panel aparece arriba en "Vencidas: hay que devolver la plata" con WhatsApp (mensajeVencida) y el botón "Ya devolví la plata" (marcar_devuelta, guarda devuelto_en). Las pendientes muestran cuántos minutos les quedan. Script: supabase/016_vencimiento.sql. YA ESTA HECHO (corrido y probado).
 Fase C: panel de la profesora (/admin)
 C1. Login con GitHub (Supabase Auth), restringido a las cuentas de los dos profesores, y protección de rutas. Políticas RLS para que cada profesor lea solo las reservas y comprobantes de sus materias (profesor_id; archivos con URLs firmadas temporales).
 C2. Cargar la disponibilidad semanal (grilla o rangos; incluir horarios de 1 hora y media hora final; poder borrar horarios sin reservas).
@@ -97,8 +97,8 @@ C3. Lista de reservas pendientes de cada profesor con el comprobante visible y b
 C5. Alumnos: registrar (DNI, nombre, apellido, teléfono), editar, bloquear y desbloquear. Lo pueden hacer los dos profesores.
 C4. Agenda semanal con cuántos alumnos hay en cada horario. Marcar clases dadas (opcional).
 Fase D: notificaciones
-D1. Email al profesor de la materia cuando llega un comprobante (asunto bien visible, link directo a la reserva). Hace falta guardar el email de cada profesor en una tabla que anon NO pueda leer (no en profesores).
-D2. Recordatorio por email los sábados a la mañana para cargar la disponibilidad.
+D1. Mensaje de Telegram al profesor de la materia cuando llega un comprobante (alumno, materia, día y hora, monto, cuántos minutos tiene para confirmar y link directo al panel). Hace falta: crear el bot con @BotFather, guardar el token del bot como secreto (nunca en el repo ni en NEXT_PUBLIC_) y el chat_id de cada profesor en una tabla que anon NO pueda leer (no en profesores). Idea a evaluar: mandarlo desde la base con pg_net al crearse la reserva, sin depender del hosting.
+D2. Recordatorio por Telegram los sábados a la mañana para cargar la disponibilidad (pg_cron, como B1).
 D3. Botón "Avisar por WhatsApp" en el panel al confirmar o rechazar: abre WhatsApp con el mensaje ya escrito al número del alumno (prefijo 549 más los 10 dígitos).
 D4. (Futuro, opcional) Migrar a la API oficial de WhatsApp si el volumen lo justifica; antes verificar la tarifa vigente para Argentina.
 Fase E: chat con Gemini
@@ -114,10 +114,10 @@ G2. Ubicación del estudio con enlace a Google Maps.
 F1. Ping anti-pausa de Supabase con GitHub Actions cada 3 o 4 días (el plan gratuito pausa los proyectos inactivos durante una semana). Es el único keep-alive necesario si el hosting es Netlify.
 F2. Datos reales: CBU y alias, monto, textos, título y descripción del sitio (hoy dice "Create Next App"), favicon y página 404.
 F3. Pruebas en celulares reales, accesibilidad básica y revisión de los límites de los planes gratuitos.
-F4. Hosting definitivo (decisión 1), variables de entorno en la cuenta de la profesora (su Supabase, su clave de Gemini, su servicio de email) y un README con los pasos del fork.
+F4. Hosting definitivo (decisión 1), variables de entorno en la cuenta de la profesora (su Supabase, su clave de Gemini, su bot de Telegram) y un README con los pasos del fork.
 F5. Capacitación breve a la profesora y documentación de uso.
 7. Seguridad (recordatorios)
-Nunca poner claves secretas (service_role, Gemini, email) en variables NEXT_PUBLIC_ ni en el repo.
+Nunca poner claves secretas (service_role, Gemini, token del bot de Telegram) en variables NEXT_PUBLIC_ ni en el repo.
 Toda regla importante (cupos, 24 hs, estados) se valida también en la base de datos, no solo en la pantalla.
 Las tablas de reservas y chats permanecen cerradas al rol anon.
 El panel solo se habilita para la cuenta de GitHub de la profesora.
