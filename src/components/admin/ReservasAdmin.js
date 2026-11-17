@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { linkWhatsApp, mensajeConfirmada, mensajeRechazada, mensajeCancelada, mensajeVencida } from "@/lib/whatsapp";
+import ChatGemini from "@/components/admin/ChatGemini";
 
 // Sección "Reservas" del panel. Cada profesor ve solo las de sus materias
 // (lo decide la política de 012, no esta pantalla). Arriba van las
@@ -80,6 +81,8 @@ export default function ReservasAdmin() {
     const [trabajando, setTrabajando] = useState(null);
     // El id de la reserva que se está cambiando (para deshabilitar sus botones).
     const [version, setVersion] = useState(0);
+    const [chatAbierto, setChatAbierto] = useState(null);
+    // El id de la reserva que tiene el chat de Gemini abierto (uno a la vez).
 
     useEffect(() => {
         async function cargar() {
@@ -311,9 +314,18 @@ export default function ReservasAdmin() {
                     >
                     Cancelar clase
                     </button>
+                    <button
+                    onClick={() => setChatAbierto(chatAbierto === r.id ? null : r.id)}
+                    // Si ya estaba abierto, lo cierra (null); si no, lo abre.
+                    aria-expanded={chatAbierto === r.id}
+                    className="border border-borde px-4 py-2 rounded-lg hover:bg-suave transition"
+                    >
+                    {chatAbierto === r.id ? "Cerrar material" : "Material con IA"}
+                    </button>
                 </>
                 )}
             </div>
+            {chatAbierto === r.id && <ChatGemini reservaId={r.id} />}
             </li>
         );
     }

@@ -2,54 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { DIAS, sumarDias, proximoLunes, formatearDia, horaFin } from "@/lib/fechas";
+// Funciones de fechas compartidas con la Agenda (ver src/lib/fechas.js).
 
 // Sección "Horarios" del panel: cargar los horarios de una semana por
 // rangos (un "desde / hasta" por día) y dar de baja horarios sin reservas.
 // Todo pasa por las funciones de 011 (cargar_horarios y dar_de_baja_horario).
-
-const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-
-function aTexto(fecha) {
-    // Convierte un Date en "2026-11-16" (el formato que usa la base).
-    const a = fecha.getFullYear();
-    const m = String(fecha.getMonth() + 1).padStart(2, "0");
-    const d = String(fecha.getDate()).padStart(2, "0");
-    return `${a}-${m}-${d}`;
-}
-
-function sumarDias(texto, dias) {
-    const fecha = new Date(`${texto}T00:00`);
-    // "T00:00" para que JavaScript lo tome como medianoche en la hora local
-    // (sin la hora, lo tomaría en UTC y podría correrse un día).
-    fecha.setDate(fecha.getDate() + dias);
-    // setDate con un número más grande que el mes pasa solo al mes siguiente
-    // (el 31 + 1 da el 1 del mes que viene).
-    return aTexto(fecha);
-}
-
-function proximoLunes() {
-    const hoy = new Date();
-    const diaSemana = hoy.getDay();
-    // getDay(): 0 = domingo, 1 = lunes, ..., 6 = sábado.
-    const faltan = diaSemana === 0 ? 1 : 8 - diaSemana;
-    // Cuántos días faltan para el próximo lunes (si hoy es lunes, el de la
-    // semana que viene, porque la profesora carga la semana siguiente).
-    return sumarDias(aTexto(hoy), faltan);
-}
-
-function formatearDia(texto) {
-    // "2026-11-16" → "16/11".
-    const [, m, d] = texto.split("-");
-    // La coma inicial salta el primer elemento (el año): no lo usamos.
-    return `${d}/${m}`;
-}
-
-function horaFin(hora, minutos) {
-    // "14:00" y 60 → "15:00".
-    const [h, m] = hora.split(":").map(Number);
-    const total = h * 60 + m + minutos;
-    return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-}
 
 const RANGOS_VACIOS = DIAS.map(() => ({ desde: "", hasta: "" }));
 // Una lista de 7 objetos, uno por día, con el rango vacío.

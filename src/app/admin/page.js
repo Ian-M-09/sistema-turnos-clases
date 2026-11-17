@@ -5,8 +5,10 @@ import { supabase } from "@/lib/supabase";
 import LoginProfesor from "@/components/LoginProfesor";
 import HorariosAdmin from "@/components/admin/HorariosAdmin";
 import ReservasAdmin from "@/components/admin/ReservasAdmin";
+import AgendaAdmin from "@/components/admin/AgendaAdmin";
 import AlumnosAdmin from "@/components/admin/AlumnosAdmin";
 import MisDatosAdmin from "@/components/admin/MisDatosAdmin";
+import LimpiezaAdmin from "@/components/admin/LimpiezaAdmin";
 
 // Panel de los profesores. Esta página no tiene ningún link desde el
 // resto del sitio. Si no hay sesión, muestra el login. Si la cuenta no
@@ -15,14 +17,14 @@ import MisDatosAdmin from "@/components/admin/MisDatosAdmin";
 // verdad son las políticas RLS de la base: aunque alguien saltee esta
 // pantalla, la base no le devuelve nada si no es profesor.
 
-const SECCIONES = ["Horarios", "Reservas", "Alumnos", "Mis datos"];
+const SECCIONES = ["Agenda", "Horarios", "Reservas", "Alumnos", "Limpieza", "Mis datos"];
 // Las pestañas del panel.
 
 export default function Admin() {
     const [sesion, setSesion] = useState(undefined);
     // Tres valores posibles: undefined = todavía no sabemos (cargando),
     // null = no inició sesión, un objeto = la sesión de la cuenta.
-    const [seccion, setSeccion] = useState("Horarios");
+    const [seccion, setSeccion] = useState("Agenda");
     // La pestaña que está abierta.
     const [profesor, setProfesor] = useState(undefined);
     // Igual: undefined = cargando, null = la cuenta no es de un profesor,
@@ -128,9 +130,11 @@ export default function Admin() {
                 ))}
             </nav>
 
+            {seccion === "Agenda" && <AgendaAdmin profesorId={profesor.profesor_id} />}
             {seccion === "Horarios" && <HorariosAdmin />}
             {seccion === "Reservas" && <ReservasAdmin />}
             {seccion === "Alumnos" && <AlumnosAdmin />}
+            {seccion === "Limpieza" && <LimpiezaAdmin />}
             {seccion === "Mis datos" && (
                 <MisDatosAdmin
                 profesorId={profesor.profesor_id}
