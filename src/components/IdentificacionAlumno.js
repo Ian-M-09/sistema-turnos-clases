@@ -94,7 +94,9 @@ export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, on
             dni,
             materia,
             profesorId: elegida.profesor_id,
-            nombreAlumno: data.nombre,
+            inicialAlumno: data.inicial,
+            // Solo la inicial (por ejemplo "J."): desde 024 la base ya no
+            // devuelve el nombre, para no exponer datos de alumnos menores.
             habilitado: data.habilitado,
             // habilitado es false si el alumno está bloqueado. No se lo
             // decimos: el calendario simplemente le muestra todo sin lugar.

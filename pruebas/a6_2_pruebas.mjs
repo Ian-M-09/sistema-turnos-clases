@@ -33,9 +33,18 @@ let fallidas = 0;
 
 // Sube un comprobante nuevo (cada reserva necesita uno distinto) y
 // devuelve su nombre. Igual que la página: uuid + extensión.
+// Desde 025 anon ya no puede subir directo, y /api/subir frenaría estas
+// pruebas por el límite de 6 URLs. Por eso SOLO esta subida usa la clave
+// service_role; las reservas se siguen haciendo con la clave pública.
+const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { persistSession: false } }
+);
+
 async function subirComprobante() {
     const nombre = crypto.randomUUID() + ".png";
-    const { error } = await supabase.storage
+    const { error } = await admin.storage
         .from("comprobantes")
         .upload(nombre, PNG_CHIQUITO, { contentType: "image/png" });
     if (error) throw new Error("No se pudo subir el comprobante: " + error.message);

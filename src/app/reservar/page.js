@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import IdentificacionAlumno from "@/components/IdentificacionAlumno";
 import Calendario from "@/components/Calendario";
@@ -13,7 +13,7 @@ import { subirArchivo } from "@/lib/archivos";
 export default function Reservar() {
     const [paso, setPaso] = useState("identificacion"); // "identificacion" | "calendario" | "datos" | "pago" | "listo"
     const [alumno, setAlumno] = useState(null);
-    // { dni, materia, profesorId, nombreAlumno, habilitado }, del primer paso.
+    // { dni, materia, profesorId, inicialAlumno, habilitado }, del primer paso.
     const [tema, setTema] = useState("rosa");
     // "rosa" (profesora) o "azul" (profesor). Cambia apenas se elige la materia.
     const [turnoElegido, setTurnoElegido] = useState(null);
@@ -24,6 +24,22 @@ export default function Reservar() {
     const [sinLugar, setSinLugar] = useState(false);
     // true si el error fue porque alguien ocupó el último lugar: ahí
     // mostramos un botón para volver a elegir horario.
+    const archivosSubidos = useRef(new WeakMap());
+    // useRef guarda un valor que sobrevive entre renders sin redibujar la
+    // página. WeakMap es un diccionario cuyas claves son objetos: acá, cada
+    // archivo con el nombre que recibió en Storage.
+
+    async function subirUnaVez(bucket, archivo) {
+        // Si la reserva falla (por ejemplo, se ocupó el horario) y el alumno
+        // reintenta, no se vuelve a subir lo que ya está en Storage. Así no
+        // gasta las 6 subidas que tiene cada 30 minutos (024).
+        const yaSubido = archivosSubidos.current.get(archivo);
+        if (yaSubido) return yaSubido;
+
+        const nombre = await subirArchivo(bucket, archivo, alumno.dni);
+        archivosSubidos.current.set(archivo, nombre);
+        return nombre;
+    }
 
     useEffect(() => {
         document.documentElement.dataset.tema = tema;
@@ -69,13 +85,13 @@ export default function Reservar() {
             for (const archivo of datosAlumno.apuntes) {
                 // "for...of" recorre la lista elemento por elemento. Lo usamos
                 // en vez de .map porque así cada subida espera a la anterior.
-                nombresApuntes.push(await subirArchivo("apuntes", archivo));
+                nombresApuntes.push(await subirUnaVez("apuntes", archivo));
                 // .push agrega al final de la lista (acá sí se puede porque es
                 // una variable común, no un estado de React).
             }
 
             // 2. Subir el comprobante.
-            const nombreComprobante = await subirArchivo("comprobantes", comprobante);
+            const nombreComprobante = await subirUnaVez("comprobantes", comprobante);
 
             // 3. Llamar a la función crear_reserva de la base (009). Ella
             // valida todo de nuevo y guarda la reserva, todo o nada. El
@@ -142,7 +158,7 @@ export default function Reservar() {
         {paso === "calendario" && (
             <>
             <p className="text-lg">
-                Hola, <strong>{alumno.nombreAlumno}</strong>. Clase de{" "}
+                Hola, <strong>{alumno.inicialAlumno}</strong>. Clase de{" "}
                 <strong>{alumno.materia}</strong>.
             </p>
             <button

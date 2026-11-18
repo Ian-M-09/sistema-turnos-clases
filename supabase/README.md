@@ -29,6 +29,8 @@ proyecto de Supabase de otra cuenta).
    - `021_limpieza.sql`: columna archivos_borrados_en; reservas_para_limpiar (clase de hace más de 30 días, salvo pendientes y vencidas sin devolver) y archivos_para_limpiar (sus archivos + huérfanos de más de 1 día). Solo para service_role: las usa la ruta /api/limpieza, que borra con la API de Storage.
    - `022_recordatorio_limpieza.sql`: archivos_para_limpiar deja afuera los .emptyFolderPlaceholder; enviar_telegram (función común para mandar un Telegram a un profesor); recordar_limpieza avisa el día 15 si hay algo para limpiar (pg_cron: 13:00 profesora, 18:00 profesor, hora de Argentina).
    - `023_menos_intentos_dni.sql`: dni_bloqueado_por_intentos baja el límite de 10 a 3 DNIs inexistentes por IP en 15 minutos (sin captcha).
+   - `024_seguridad.sql`: tabla cerrada subidas_firmadas; permiso_subida (solo service_role, la usa la ruta /api/subir) valida el DNI, el límite por IP, bloqueo, reserva pendiente y máximo 6 URLs de subida por alumno en 30 minutos; verificar_alumno devuelve solo la inicial del nombre.
+   - `025_cerrar_subidas_anon.sql`: borra las políticas "anon sube comprobantes" y "anon sube apuntes". **Correrlo recién cuando la página con /api/subir esté publicada.** En una base nueva, se corre directamente después de 024.
 
 ## Edge Functions
 - `functions/gemini/index.ts`: genera el material con Gemini. Se despliega desde el panel de Supabase (Edge Functions → Deploy a new function → Via Editor, con el nombre `gemini`) o con la CLI. Secretos: `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2` y, opcionales, `GEMINI_MODELO` y `GEMINI_MODELO_RESPALDO`.

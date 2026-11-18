@@ -141,13 +141,32 @@ async function pedirAGemini(modelo, clave, cuerpo, topeMs) {
 const ENTIDADES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
 // En XML, algunos caracteres se escriben con códigos: "&amp;" es "&".
 
+const TOPE_WORD_BYTES = 5 * 1024 * 1024;
+// Máximo que puede medir el texto de un .docx ya descomprimido (5 MB). Un
+// "ZIP bomba" es un archivo chiquito que al descomprimirse ocupa muchísimo
+// y puede dejar sin memoria a la función.
+
 function textoDeWord(bytes) {
     // Saca el texto de un .docx. Un .docx es en realidad un ZIP, y el texto
     // está adentro, en el archivo word/document.xml.
     // (La librería mammoth, que se usaba antes, no funciona en Deno.)
+    let acumulado = 0;
+    // Suma los tamaños: un ZIP armado a mano puede repetir el mismo nombre
+    // muchas veces para esquivar un tope que mire cada entrada por separado.
     const archivos = unzipSync(bytes, {
-        filter: (archivo) => archivo.name === "word/document.xml",
-        // filter: descomprime solo ese archivo, para gastar menos procesador.
+        filter: (archivo) => {
+            // filter: se llama ANTES de descomprimir cada archivo del ZIP.
+            // Devuelve true para descomprimirlo y false para saltearlo.
+            if (archivo.name !== "word/document.xml") return false;
+            acumulado += archivo.originalSize;
+            // originalSize: cuánto dice el ZIP que mide ya descomprimido. Si
+            // miente y dice menos, fflate corta la salida en ese tamaño.
+            if (acumulado > TOPE_WORD_BYTES) {
+                throw new Error("El apunte en Word es demasiado grande.");
+                // throw corta unzipSync; lo atrapa el try/catch de leerApuntes.
+            }
+            return true;
+        },
     });
     const documento = archivos["word/document.xml"];
     if (!documento) return "";
@@ -190,7 +209,13 @@ async function leerApuntes(supabase, nombres) {
         const buffer = Buffer.from(await archivo.arrayBuffer());
 
         if (extension === "docx") {
-            partes.push({ text: `Contenido de un apunte en Word:\n${textoDeWord(buffer)}` });
+            try {
+                partes.push({ text: `Contenido de un apunte en Word:\n${textoDeWord(buffer)}` });
+            } catch {
+                // Si el Word es demasiado grande o está dañado, se saltea ese
+                // apunte y Gemini recibe el aviso. Los demás se leen igual.
+                partes.push({ text: "Aviso: se salteó un apunte en Word porque está dañado o pasa de 5 MB al descomprimirlo." });
+            }
         } else if (TIPOS[extension]) {
             partes.push({
                 inlineData: { mimeType: TIPOS[extension], data: buffer.toString("base64") },

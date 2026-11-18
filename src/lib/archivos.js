@@ -10,6 +10,10 @@ export const MAX_COMPROBANTE = 2 * MB;
 export const MAX_APUNTES = 3 * MB;
 // MAX_APUNTES es el total entre TODOS los apuntes, no por archivo.
 
+export const MAX_CANTIDAD_APUNTES = 5;
+// permiso_subida (024) da 6 URLs de subida cada 30 minutos por alumno:
+// 5 apuntes + 1 comprobante. Con más apuntes la reserva nunca terminaría.
+
 const EXTENSIONES = {
     "application/pdf": "pdf",
     "image/jpeg": "jpg",
@@ -20,7 +24,7 @@ const EXTENSIONES = {
 // Un objeto usado como "diccionario": la clave es el MIME type (la
 // etiqueta que dice qué es el archivo) y el valor, la extensión que le
 // ponemos al nombre. Así un JPEG siempre termina en .jpg (nunca .jpeg),
-// que es lo que acepta la política de 007.
+// que es lo que acepta la ruta /api/subir.
 
 export const TIPOS_COMPROBANTE = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
 export const TIPOS_APUNTES = [...TIPOS_COMPROBANTE, "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
@@ -120,7 +124,8 @@ export async function achicarImagen(archivo) {
     // new File arma un archivo de verdad (con nombre y tipo) a partir del Blob.
 }
 
-export async function subirArchivo(bucket, archivo) {
+export async function subirArchivo(bucket, archivo, dni) {
+    // dni: lo necesita /api/subir para validar que el alumno esté registrado.
     const extension = EXTENSIONES[archivo.type];
     // EXTENSIONES[clave] busca el valor en el diccionario. Si el tipo no
     // está, da undefined.
@@ -130,16 +135,31 @@ export async function subirArchivo(bucket, archivo) {
         // de quien la llamó (page.js).
     }
 
-    const nombre = `${crypto.randomUUID()}.${extension}`;
-    // crypto.randomUUID() genera un identificador aleatorio imposible de
-    // adivinar, por ejemplo "3f2b9c1e-8a4d-4f6b-9e2a-1c5d7b8e9f00". Es el
-    // formato que exige la política de subida de 007.
+    // 1. Pedirle permiso a nuestro servidor. fetch hace un pedido HTTP;
+    // JSON.stringify convierte el objeto en texto para poder mandarlo.
+    const respuesta = await fetch("/api/subir", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dni, bucket, extension }),
+    });
+    const datos = await respuesta.json().catch(() => null);
+    // .catch(() => null): si la respuesta no es JSON, seguimos con null.
 
+    if (!respuesta.ok) {
+        // respuesta.ok es false si el código HTTP no es 2xx. El servidor
+        // manda un mensaje pensado para el alumno y page.js lo muestra.
+        throw new Error(datos?.error ?? `No se pudo subir "${archivo.name}". Probá de nuevo.`);
+    }
+
+    const { nombre, token } = datos;
+    // El servidor eligió el nombre (un UUID aleatorio + la extensión) y
+    // firmó el permiso para subir exactamente ese archivo.
+
+    // 2. Subir el archivo directo a Supabase con ese permiso. No pasa por
+    // Netlify, así no gastamos sus funciones en mover archivos.
     const { error } = await supabase.storage
         .from(bucket)
-        .upload(nombre, archivo, { contentType: archivo.type });
-    // .upload sube el archivo. Sin "upsert: true" nunca reemplaza uno
-    // existente (anon tampoco tendría permiso para hacerlo).
+        .uploadToSignedUrl(nombre, token, archivo, { contentType: archivo.type });
 
     if (error) {
         throw new Error(`No se pudo subir "${archivo.name}". Probá de nuevo.`);
