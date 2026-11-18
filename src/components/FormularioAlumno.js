@@ -249,7 +249,7 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         <button
             type="submit"
             disabled={procesando}
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+            className="vidrio px-6 py-3"
         >
             Continuar
         </button>

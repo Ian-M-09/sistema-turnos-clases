@@ -10,7 +10,7 @@ import Link from "next/link";
 // Link: el link de Next.js. Cambia de página sin recargar todo el sitio.
 
 export const metadata = {
-    title: "Página no encontrada | ClasesParticulares.M-R",
+    title: "Página no encontrada | M&R Academia",
     // Título de la pestaña mientras se ve esta página.
 };
 
@@ -24,7 +24,7 @@ export default function NotFound() {
             <p className="text-lg mb-6">
                 Puede que el link esté mal escrito o que la página se haya movido.
             </p>
-            <Link href="/" className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition">
+            <Link href="/" className="vidrio px-6 py-3">
                 Volver al inicio
             </Link>
         </main>

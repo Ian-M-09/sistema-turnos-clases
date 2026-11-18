@@ -163,7 +163,7 @@ export default function ComprobantePago({ profesorId, minutos, onConfirmar, envi
             disabled={procesando || enviando}
             // disabled: mientras se envía no se puede tocar de nuevo, así no
             // se crean dos reservas por un doble clic.
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+            className="vidrio px-6 py-3 disabled:opacity-60"
         >
             {enviando ? "Enviando..." : "Confirmar reserva"}
             {/* condición ? siPasa : siNo  es el "operador ternario": un if

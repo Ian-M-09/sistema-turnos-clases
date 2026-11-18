@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import IdentificacionAlumno from "@/components/IdentificacionAlumno";
 import Calendario from "@/components/Calendario";
@@ -14,8 +14,6 @@ export default function Reservar() {
     const [paso, setPaso] = useState("identificacion"); // "identificacion" | "calendario" | "datos" | "pago" | "listo"
     const [alumno, setAlumno] = useState(null);
     // { dni, materia, profesorId, inicialAlumno, habilitado }, del primer paso.
-    const [tema, setTema] = useState("rosa");
-    // "rosa" (profesora) o "azul" (profesor). Cambia apenas se elige la materia.
     const [turnoElegido, setTurnoElegido] = useState(null);
     const [datosAlumno, setDatosAlumno] = useState(null);
     const [enviando, setEnviando] = useState(false);
@@ -40,19 +38,6 @@ export default function Reservar() {
         archivosSubidos.current.set(archivo, nombre);
         return nombre;
     }
-
-    useEffect(() => {
-        document.documentElement.dataset.tema = tema;
-        // document.documentElement es la etiqueta <html> de la página.
-        // .dataset.tema = "azul" le pone el atributo data-tema="azul", y el
-        // CSS de globals.css cambia todos los colores.
-        return () => {
-            delete document.documentElement.dataset.tema;
-        };
-        // La función que devuelve un useEffect es la "limpieza": React la
-        // ejecuta antes de volver a correr el efecto y cuando el alumno se
-        // va de /reservar. Así la página de inicio vuelve a ser rosa.
-    }, [tema]);
 
     function handleIdentificado(datos) {
         setAlumno(datos);
@@ -148,9 +133,6 @@ export default function Reservar() {
         {paso === "identificacion" && (
             <IdentificacionAlumno
                 datosIniciales={alumno}
-                onCambiarTema={setTema}
-                // Le pasamos directamente setTema: el hijo la llama con
-                // "rosa" o "azul" cuando cambia la materia.
                 onContinuar={handleIdentificado}
             />
         )}
@@ -183,7 +165,7 @@ export default function Reservar() {
             </p>
             <button
                 onClick={() => setPaso("calendario")}
-                className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+                className="vidrio px-6 py-3"
             >
                 Cambiar horario
             </button>
@@ -212,7 +194,7 @@ export default function Reservar() {
             {sinLugar && (
                 <button
                 onClick={() => setPaso("calendario")}
-                className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+                className="vidrio px-6 py-3"
                 >
                 Elegir otro horario
                 </button>
@@ -244,7 +226,7 @@ export default function Reservar() {
             // guarda la reserva, así no se va a la mitad.
             <Link
             href="/"
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+            className="vidrio px-6 py-3"
             >
             ← Volver al inicio
             </Link>

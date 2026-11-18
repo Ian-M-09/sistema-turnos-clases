@@ -151,7 +151,7 @@ export default function AgendaAdmin({ profesorId }) {
             <button
             onClick={() => cambiarSemana(-1)}
             aria-label="Semana anterior"
-            className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde"
+            className="vidrio px-3 py-1"
             >
             ←
             </button>
@@ -161,7 +161,7 @@ export default function AgendaAdmin({ profesorId }) {
             <button
             onClick={() => cambiarSemana(1)}
             aria-label="Semana siguiente"
-            className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde"
+            className="vidrio px-3 py-1"
             >
             →
             </button>
@@ -235,7 +235,7 @@ export default function AgendaAdmin({ profesorId }) {
                                     <button
                                     onClick={() => marcarDada(r, true)}
                                     disabled={trabajando === r.id}
-                                    className="px-3 py-1 rounded-lg bg-acento text-white hover:bg-acento-hover transition disabled:opacity-60"
+                                    className="vidrio px-3 py-1 disabled:opacity-60"
                                     >
                                     Clase dada
                                     </button>

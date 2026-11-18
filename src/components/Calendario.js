@@ -297,7 +297,7 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
           onClick={() => cambiarMes(-1)}
           disabled={!puedeRetroceder}
           aria-label="Mes anterior"
-          className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
+          className="vidrio px-3 py-1 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           ←
         </button>
@@ -314,7 +314,7 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
           onClick={() => cambiarMes(1)}
           disabled={!puedeAvanzar}
           aria-label="Mes siguiente"
-          className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde disabled:opacity-30 disabled:cursor-not-allowed"
+          className="vidrio px-3 py-1 disabled:opacity-30 disabled:cursor-not-allowed"
         >
           →
         </button>
@@ -353,13 +353,13 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
               key={dia}
               onClick={() => handleClickDia(dia)}
               disabled={!disponible}
-              className={`p-2 rounded-lg text-sm border
+              className={`p-2 rounded-xl text-sm
                 ${
                   seleccionado
-                    ? "bg-acento border-acento text-white"
+                    ? "vidrio-activo"
                     : disponible
-                      ? "bg-suave border-borde text-acento-hover font-medium hover:bg-borde cursor-pointer"
-                      : "bg-fondo border-transparent text-texto/30 cursor-not-allowed"
+                      ? "vidrio cursor-pointer"
+                      : "border border-transparent text-texto/30 cursor-not-allowed"
                 }
               `}
             >
@@ -382,10 +382,10 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
                   key={h.id}
                   onClick={() => elegirInicio(h)}
                   aria-pressed={elegido}
-                  className={`border rounded-lg px-3 py-2 font-medium ${
+                  className={`px-3 py-2 font-medium ${
                     elegido
-                      ? "bg-acento border-acento text-white"
-                      : "bg-suave border-borde text-acento-hover hover:bg-borde"
+                      ? "vidrio-activo"
+                      : "vidrio"
                   }`}
                 >
                   {/* aria-pressed le avisa a los lectores de pantalla que el
@@ -417,10 +417,10 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
                     key={o.bloques}
                     onClick={() => setBloquesElegidos(o.bloques)}
                     aria-pressed={bloquesElegidos === o.bloques}
-                    className={`border rounded-lg px-4 py-2 font-medium ${
+                    className={`px-4 py-2 font-medium ${
                       bloquesElegidos === o.bloques
-                        ? "bg-acento border-acento text-white"
-                        : "bg-suave border-borde text-acento-hover hover:bg-borde"
+                        ? "vidrio-activo"
+                        : "vidrio"
                     }`}
                   >
                     {textoDuracion(o.minutos)}
@@ -441,7 +441,7 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
               </p>
               <button
                 onClick={confirmarHorarios}
-                className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition"
+                className="vidrio px-6 py-3"
               >
                 Continuar
               </button>

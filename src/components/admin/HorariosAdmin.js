@@ -150,7 +150,7 @@ export default function HorariosAdmin() {
             <button
             onClick={() => cambiarSemana(-1)}
             aria-label="Semana anterior"
-            className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde"
+            className="vidrio px-3 py-1"
             >
             ←
             </button>
@@ -160,7 +160,7 @@ export default function HorariosAdmin() {
             <button
             onClick={() => cambiarSemana(1)}
             aria-label="Semana siguiente"
-            className="px-3 py-1 rounded-lg border border-borde bg-suave text-acento-hover hover:bg-borde"
+            className="vidrio px-3 py-1"
             >
             →
             </button>
@@ -201,7 +201,7 @@ export default function HorariosAdmin() {
             <button
             type="submit"
             disabled={trabajando}
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+            className="vidrio px-6 py-3 disabled:opacity-60"
             >
             {trabajando ? "Cargando..." : "Cargar horarios"}
             </button>

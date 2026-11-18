@@ -204,7 +204,7 @@ export default function AlumnosAdmin() {
             <button
                 type="submit"
                 disabled={guardando}
-                className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+                className="vidrio px-6 py-3 disabled:opacity-60"
             >
                 {guardando ? "Guardando..." : editandoId ? "Guardar cambios" : "Registrar"}
                 {/* Dos ternarios seguidos: si guarda, "Guardando..."; si no, según

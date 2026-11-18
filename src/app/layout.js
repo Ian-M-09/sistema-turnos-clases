@@ -2,6 +2,8 @@ import { Montserrat, Work_Sans } from "next/font/google";
 // Montserrat (geométrica, sans-serif) reemplaza a Lora en los títulos.
 // Work Sans sigue en los textos.
 import "./globals.css";
+import IntroMarca from "@/components/IntroMarca";
+import Encabezado from "@/components/Encabezado";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -15,7 +17,7 @@ const workSans = Work_Sans({
 });
 
 export const metadata = {
-  title: "ClasesParticulares.M-R",
+  title: "M&R Academia",
   // title: el texto de la pestaña del navegador. También es el título que
   // muestran WhatsApp y Google cuando se comparte o se busca el link.
   // Las páginas que tengan su propio title (como /admin) lo reemplazan.
@@ -34,6 +36,8 @@ export default function RootLayout({ children }) {
             página y el footer) uno debajo del otro. Como el <main> de cada
             página tiene flex-1 (ocupa todo el espacio que sobra), el footer
             queda empujado al final aunque la página tenga poco contenido. */}
+        <IntroMarca />
+        <Encabezado />
         {children}
         <footer className="border-t border-borde mt-auto py-6 px-4 text-center text-sm text-texto/70">
           {/* mt-auto: margen de arriba automático; es un refuerzo para que
@@ -52,7 +56,7 @@ export default function RootLayout({ children }) {
             </a>
             {" · "}
             {/* ·: un punto medio para separar las dos partes. */}
-            © {new Date().getFullYear()} ClasesParticulares.M-R. Todos los derechos reservados.
+            © {new Date().getFullYear()} M&amp;R Academia. Todos los derechos reservados.
             {/* ©: el símbolo de copyright. new Date().getFullYear(): el año
                 actual. Esta página se arma cuando Netlify compila el sitio,
                 así que el año se actualiza en el primer deploy de cada año. */}

@@ -26,7 +26,7 @@ export default function Ubicacion() {
                 rel="noopener noreferrer"
                 // rel="noopener noreferrer": por seguridad, la pestaña nueva
                 // no puede controlar a esta (siempre va junto con _blank).
-                className="inline-block bg-acento text-white px-5 py-2 rounded-lg hover:bg-acento-hover transition"
+                className="inline-block vidrio px-5 py-2"
             >
                 Cómo llegar (Google Maps)
             </a>

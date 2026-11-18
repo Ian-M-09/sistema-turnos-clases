@@ -1,37 +1,23 @@
 @import "tailwindcss";
 
+/* Colores de TODA la página: fondo blanco y letras negras, iguales para
+   los dos profesores. Para cambiar un color, alcanza con cambiarlo acá. */
 :root {
-  --fondo: #f6e9da;
-  /* Crema más marcado, con más calidez que el anterior. */
+  --fondo: #ffffff;
   --superficie: #ffffff;
-  --texto: #9F6570;
-  --borde: #e3b6bc;
-  /* Un poco más saturado que antes, para que los bordes se noten. */
-  --acento: #a8465c;
-  /* Rosa más vivo y saturado que el Rosewood original, para que los
-     botones se destaquen de verdad. */
-  --acento-hover: #8a3649;
-  /* Un escalón más oscuro, para el estado hover. */
-  --aviso: #b77f87;
-  --suave: #f4d4da;
-  /* Antes se llamaba --rosa-suave. Ahora es "suave" porque en el tema
-     azul este color no es rosa. */
-}
-
-/* Tema azul: las materias del profesor. Cuando la página pone
-   data-tema="azul" en la etiqueta <html>, estas variables reemplazan a
-   las de arriba y TODA la página cambia de color (Tailwind usa estas
-   mismas variables). [data-tema="azul"] es un "selector de atributo":
-   elige los elementos que tengan ese atributo con ese valor. */
-:root[data-tema="azul"] {
-  --fondo: #e6edf5;
-  /* Gris azulado claro, el equivalente frío del crema. */
-  --texto: #4d6683;
-  --borde: #b3c7dd;
-  --acento: #2f5f8f;
-  --acento-hover: #224a72;
-  --aviso: #6f8fb3;
-  --suave: #d4e2f1;
+  --texto: #000000;
+  --borde: #d1d1d6;
+  /* Gris claro para los bordes de tarjetas y campos. */
+  --acento: #000000;
+  --acento-hover: #000000;
+  --aviso: #5c5c61;
+  /* Gris oscuro para avisos chicos como "¡Último lugar!". */
+  --suave: #f5f5f7;
+  /* Gris casi blanco para los recuadros que se tienen que distinguir. */
+  --vidrio-color-arriba: rgba(91, 114, 135, 0.96);
+  --vidrio-color-abajo: rgba(70, 91, 110, 0.96);
+  /* Azul grisáceo (blue smoke) de los botones presionados o elegidos. Para
+     probar otro color, alcanza con cambiar estas dos líneas. */
 }
 
 @theme inline {
@@ -48,9 +34,6 @@
 body {
   background: var(--fondo);
   color: var(--texto);
-  transition: background-color 0.4s ease, color 0.4s ease;
-  /* transition: cuando cambia el tema, el fondo y el texto pasan de un
-     color al otro en 0.4 segundos en vez de cambiar de golpe. */
   font-family: var(--font-work-sans), sans-serif;
   /* Acá sí referenciamos la variable real de next/font directamente,
      no un alias de @theme. */
@@ -72,7 +55,215 @@ select option {
 }
 
 h1, h2 {
-  color: var(--acento-hover);
-  /* Los títulos ya no usan el marrón del texto: toman el rosa oscuro,
-     que sobre el crema se lee bien (el contraste es alto). */
+  color: var(--texto);
+}
+
+/* @layer components: "capa" de Tailwind para clases propias. Las clases
+   de Tailwind (px-6, rounded-xl...) pueden pisar lo que se define acá. */
+@layer components {
+  /* Botones de vidrio, como los del iPhone. Un vidrio sobre fondo blanco
+     no se vería solo: lo que da el efecto es la mezcla de un degradé
+     translúcido, un brillo arriba y una sombra suave abajo. */
+  .vidrio,
+  .vidrio-activo {
+    border-radius: 9999px;
+    /* Un radio enorme hace que el botón quede con forma de píldora. */
+    font-weight: 500;
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
+    /* backdrop-filter: desenfoca lo que hay DETRÁS del botón. La versión
+       con -webkit- es la que entiende Safari en el iPhone. */
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    /* transition: los cambios de abajo se animan en vez de ser de golpe. */
+    -webkit-tap-highlight-color: transparent;
+    /* Saca el recuadro gris que el iPhone dibuja encima al tocar un botón,
+       así se ve solamente el color del vidrio. */
+  }
+
+  .vidrio {
+    color: #000000;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(242, 242, 247, 0.6) 55%,
+      rgba(226, 226, 233, 0.65) 100%
+    );
+    /* linear-gradient: pasa de un color a otro, de arriba (180deg) hacia
+       abajo. rgba(rojo, verde, azul, opacidad): el último número es cuánto
+       se ve el color, de 0 (invisible) a 1 (sólido). */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 1),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.06),
+      0 1px 2px rgba(0, 0, 0, 0.08),
+      0 6px 16px rgba(0, 0, 0, 0.1);
+    /* box-shadow admite varias sombras separadas por coma. "inset" dibuja
+       la sombra hacia adentro: acá hace el brillo del borde del vidrio. */
+  }
+
+  /* Vidrio de color: el día, horario o pestaña que está elegido
+     (.vidrio-activo) y cualquier botón mientras se lo presiona (:active).
+     :not(:disabled): los botones deshabilitados no cambian de color. */
+  .vidrio-activo,
+  .vidrio:active:not(:disabled) {
+    color: #ffffff;
+    background: linear-gradient(180deg, var(--vidrio-color-arriba) 0%, var(--vidrio-color-abajo) 100%);
+    /* var(--nombre): usa el color definido arriba, en :root. */
+    border: 1px solid rgba(70, 91, 110, 0.7);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.4),
+      0 1px 2px rgba(70, 91, 110, 0.2),
+      0 6px 16px rgba(70, 91, 110, 0.28);
+  }
+
+  /* @media (hover: hover): solo en equipos con mouse. En el celular, el
+     efecto quedaría "pegado" después de tocar el botón. */
+  @media (hover: hover) {
+    .vidrio:hover:not(:disabled),
+    .vidrio-activo:hover:not(:disabled) {
+      transform: translateY(-1px);
+      /* translateY(-1px): sube el botón 1 píxel. */
+    }
+  }
+
+  /* :active: mientras se está apretando. scale lo achica un poquito. */
+  .vidrio:active:not(:disabled),
+  .vidrio-activo:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  /* :focus-visible: marca el botón cuando se llega con el teclado. */
+  .vidrio:focus-visible,
+  .vidrio-activo:focus-visible {
+    outline: 2px solid #000000;
+    outline-offset: 2px;
+  }
+
+  .vidrio:disabled,
+  .vidrio-activo:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Barra de arriba, también de vidrio. */
+  .barra-vidrio {
+    background: rgba(255, 255, 255, 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  /* El logo: M&R grande y "academia" mucho más chico abajo. */
+  .marca-titulo {
+    display: block;
+    font-family: var(--font-montserrat), sans-serif;
+    font-size: clamp(4.5rem, 20vw, 8rem);
+    /* clamp(mínimo, ideal, máximo): el tamaño crece con el ancho de la
+       pantalla (20vw = 20% del ancho) sin pasarse de esos dos límites. */
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: #000000;
+  }
+
+  .marca-subtitulo {
+    display: block;
+    margin-top: 0.75rem;
+    padding-left: 0.42em;
+    /* Compensa el espacio que queda después de la última letra, así la
+       palabra se ve bien centrada. */
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.42em;
+    color: #000000;
+  }
+
+  /* Animación de entrada: una capa blanca que tapa toda la página. */
+  .intro {
+    position: fixed;
+    inset: 0;
+    /* inset: 0 la estira hasta los cuatro bordes de la pantalla. */
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #ffffff;
+    pointer-events: none;
+    /* pointer-events: none: la capa nunca bloquea los toques. */
+    animation: intro-salida 0.45s ease-in 1.25s forwards;
+    /* animation: nombre, duración, ritmo, espera antes de empezar.
+       forwards: al terminar, se queda como quedó el último cuadro. */
+  }
+
+  .intro .marca-titulo {
+    animation: intro-titulo 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    /* cubic-bezier: arranca rápido y frena suave.
+       both: antes de empezar ya se aplica el primer cuadro (invisible). */
+  }
+
+  .intro .marca-subtitulo {
+    animation: intro-subtitulo 0.5s ease-out 0.28s both;
+  }
+}
+
+/* El aviso "¡Último lugar!" es gris: mientras se presiona el horario pasa a
+   blanco para que se lea sobre el color. Va afuera de @layer para poder
+   ganarle a la clase text-aviso de Tailwind. */
+.vidrio:active:not(:disabled) .text-aviso {
+  color: #ffffff;
+}
+
+/* @keyframes: los cuadros de una animación. "from" es cómo empieza y "to"
+   cómo termina; el navegador dibuja todo lo que hay en el medio. */
+@keyframes intro-titulo {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes intro-subtitulo {
+  from {
+    opacity: 0;
+    letter-spacing: 0.1em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.42em;
+  }
+}
+
+@keyframes intro-salida {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    /* hidden: al terminar, la capa deja de existir para el navegador. */
+  }
+}
+
+/* prefers-reduced-motion: la persona pidió en su celular o computadora ver
+   menos movimiento. Se muestra el logo quieto y se va más rápido. */
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    animation-duration: 0.2s;
+    animation-delay: 0.7s;
+  }
+
+  .intro .marca-titulo,
+  .intro .marca-subtitulo {
+    animation: none;
+  }
+
+  .vidrio,
+  .vidrio-activo {
+    transition: none;
+  }
 }

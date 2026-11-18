@@ -86,7 +86,7 @@ export default function ChatGemini({ reservaId }) {
             <button
             onClick={() => pedirAGemini("")}
             disabled={esperando}
-            className="self-start bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+            className="self-start vidrio px-4 py-2 disabled:opacity-60"
             >
             {esperando ? "Generando (puede tardar un poco)..." : "Generar material"}
             </button>
@@ -126,7 +126,7 @@ export default function ChatGemini({ reservaId }) {
             <button
                 type="submit"
                 disabled={esperando || !pedido.trim()}
-                className="self-start bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+                className="self-start vidrio px-4 py-2 disabled:opacity-60"
             >
                 {esperando ? "Esperando a Gemini..." : "Enviar"}
             </button>

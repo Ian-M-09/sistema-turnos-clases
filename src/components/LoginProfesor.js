@@ -80,7 +80,7 @@ export default function LoginProfesor() {
         <button
             type="submit"
             disabled={entrando}
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+            className="vidrio px-6 py-3 disabled:opacity-60"
         >
             {entrando ? "Entrando..." : "Entrar"}
         </button>

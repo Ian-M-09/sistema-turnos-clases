@@ -1,4 +1,4 @@
-# ClasesParticulares.M-R
+# M&R Academia
 
 [Español](README.md) · **English**
 

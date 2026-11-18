@@ -87,7 +87,7 @@ export default function LimpiezaAdmin() {
             <button
             onClick={handleLimpiar}
             disabled={borrando}
-            className="self-start bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+            className="self-start vidrio px-6 py-3 disabled:opacity-60"
             >
             {borrando ? "Borrando..." : "Limpiar"}
             </button>

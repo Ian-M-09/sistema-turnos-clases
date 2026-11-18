@@ -4,14 +4,11 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 // Primer paso de /reservar: el alumno pone su DNI y elige la materia.
-// La materia define el profesor (y con eso el color de la página y la
-// cuenta a depositar). El DNI se verifica con la función
+// La materia define el profesor (y con eso la cuenta a depositar). El DNI se verifica con la función
 // verificar_alumno de la base (009): solo pueden reservar los alumnos
 // que registraron los profesores.
 
-export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, onContinuar }) {
-    // onCambiarTema: avisa al padre apenas cambia la materia, así el color
-    // cambia en el momento (sin esperar a "Continuar").
+export default function IdentificacionAlumno({ datosIniciales, onContinuar }) {
     const [materias, setMaterias] = useState([]);
     const [errorCarga, setErrorCarga] = useState(null);
     const [dni, setDni] = useState(datosIniciales?.dni ?? "");
@@ -23,10 +20,7 @@ export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, on
         async function cargarMaterias() {
             const { data, error } = await supabase
                 .from("materias")
-                .select("nombre, profesor_id, profesores(tema)")
-                // profesores(tema): como materias.profesor_id apunta a la
-                // tabla profesores, Supabase puede traer en la misma consulta
-                // el tema de ese profesor. Llega como { tema: "azul" }.
+                .select("nombre, profesor_id")
                 .order("orden", { ascending: true });
 
             if (error) {
@@ -42,13 +36,6 @@ export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, on
 
     function buscarMateria(nombre) {
         return materias.find((m) => m.nombre === nombre);
-    }
-
-    function handleMateriaChange(e) {
-        setMateria(e.target.value);
-        const elegida = buscarMateria(e.target.value);
-        onCambiarTema(elegida?.profesores?.tema ?? "rosa");
-        // Si vuelve a "Elegí una materia" (elegida es undefined), queda rosa.
     }
 
     async function handleSubmit(e) {
@@ -133,7 +120,7 @@ export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, on
             <select
             id="materia"
             value={materia}
-            onChange={handleMateriaChange}
+            onChange={(e) => setMateria(e.target.value)}
             className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             required
             >
@@ -160,7 +147,7 @@ export default function IdentificacionAlumno({ datosIniciales, onCambiarTema, on
         <button
             type="submit"
             disabled={verificando || materias.length === 0}
-            className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+            className="vidrio px-6 py-3 disabled:opacity-60"
         >
             {verificando ? "Verificando..." : "Continuar"}
         </button>

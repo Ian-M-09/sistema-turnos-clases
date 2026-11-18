@@ -266,7 +266,7 @@ export default function ReservasAdmin() {
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition"
+                        className="vidrio px-4 py-2"
                     >
                         WhatsApp
                     </a>
@@ -274,7 +274,7 @@ export default function ReservasAdmin() {
                     <button
                     onClick={() => marcarDevuelta(r)}
                     disabled={ocupado}
-                    className="border border-borde px-4 py-2 rounded-lg hover:bg-suave transition disabled:opacity-60"
+                    className="vidrio px-4 py-2 disabled:opacity-60"
                     >
                     Ya devolví la plata
                     </button>
@@ -286,14 +286,14 @@ export default function ReservasAdmin() {
                     <button
                     onClick={() => cambiarEstado(r, "confirmar")}
                     disabled={ocupado}
-                    className="bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition disabled:opacity-60"
+                    className="vidrio px-4 py-2 disabled:opacity-60"
                     >
                     Confirmar
                     </button>
                     <button
                     onClick={() => cambiarEstado(r, "rechazar")}
                     disabled={ocupado}
-                    className="border border-borde px-4 py-2 rounded-lg hover:bg-suave transition disabled:opacity-60"
+                    className="vidrio px-4 py-2 disabled:opacity-60"
                     >
                     Rechazar
                     </button>
@@ -305,7 +305,7 @@ export default function ReservasAdmin() {
                         href={linkWhatsApp(r.telefono, mensajeConfirmada({ ...r.clase, nombre: r.nombre }))}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition"
+                        className="vidrio px-4 py-2"
                     >
                         WhatsApp
                     </a>
@@ -313,7 +313,7 @@ export default function ReservasAdmin() {
                     <button
                     onClick={() => cambiarEstado(r, "cancelar")}
                     disabled={ocupado}
-                    className="border border-borde px-4 py-2 rounded-lg hover:bg-suave transition disabled:opacity-60"
+                    className="vidrio px-4 py-2 disabled:opacity-60"
                     >
                     Cancelar clase
                     </button>
@@ -321,7 +321,7 @@ export default function ReservasAdmin() {
                     onClick={() => setChatAbierto(chatAbierto === r.id ? null : r.id)}
                     // Si ya estaba abierto, lo cierra (null); si no, lo abre.
                     aria-expanded={chatAbierto === r.id}
-                    className="border border-borde px-4 py-2 rounded-lg hover:bg-suave transition"
+                    className="vidrio px-4 py-2"
                     >
                     {chatAbierto === r.id ? "Cerrar material" : "Material con IA"}
                     </button>
@@ -344,7 +344,7 @@ export default function ReservasAdmin() {
                 href={aviso.whatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="self-start bg-acento text-white px-4 py-2 rounded-lg hover:bg-acento-hover transition"
+                className="self-start vidrio px-4 py-2"
                 // self-start: este elemento no se estira a todo el ancho.
             >
                 Abrir WhatsApp

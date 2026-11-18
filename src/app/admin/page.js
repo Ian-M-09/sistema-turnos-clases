@@ -28,7 +28,7 @@ export default function Admin() {
     // La pestaña que está abierta.
     const [profesor, setProfesor] = useState(undefined);
     // Igual: undefined = cargando, null = la cuenta no es de un profesor,
-    // un objeto = { profesor_id, profesores: { nombre, tema } }.
+    // un objeto = { profesor_id, profesores: { nombre } }.
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data }) => setSesion(data.session));
@@ -57,7 +57,7 @@ export default function Admin() {
         async function cargarProfesor() {
             const { data } = await supabase
                 .from("usuarios_profesores")
-                .select("profesor_id, profesores(nombre, tema)")
+                .select("profesor_id, profesores(nombre)")
                 .maybeSingle();
             // La política de 010 solo le deja ver SU fila, así que no hace
             // falta filtrar por id. maybeSingle(): como single(), pero si no
@@ -68,16 +68,6 @@ export default function Admin() {
         cargarProfesor();
     }, [userId]);
     // Se vuelve a correr cuando cambia la cuenta (por ejemplo, al entrar).
-
-    useEffect(() => {
-        const tema = profesor?.profesores.tema;
-        if (!tema) return;
-        document.documentElement.dataset.tema = tema;
-        // El panel toma el color del profesor (rosa o azul), igual que /reservar.
-        return () => {
-            delete document.documentElement.dataset.tema;
-        };
-    }, [profesor]);
 
     async function cerrarSesion() {
         await supabase.auth.signOut();
@@ -119,10 +109,10 @@ export default function Admin() {
                     key={s}
                     onClick={() => setSeccion(s)}
                     aria-pressed={seccion === s}
-                    className={`px-4 py-2 rounded-lg border font-medium transition ${
+                    className={`px-4 py-2 font-medium ${
                     seccion === s
-                        ? "bg-acento border-acento text-white"
-                        : "bg-suave border-borde text-acento-hover hover:bg-borde"
+                        ? "vidrio-activo"
+                        : "vidrio"
                     }`}
                 >
                     {s}

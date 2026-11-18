@@ -367,7 +367,13 @@ Deno.serve(async (request) => {
     const { error } = chat
         ? await supabase.from("chats").update({ historial: final }).eq("id", chat.id)
         : await supabase.from("chats").insert({ reserva_id: reservaId, historial: final });
-    if (error) return responder({ error: "Gemini respondió, pero no se pudo guardar el chat." }, 500);
+    if (error) {
+        console.error("No se pudo guardar el chat:", error.code, error.message);
+        // console.error: deja el motivo en los logs de la función en Supabase.
+        // error.code es el código de Postgres (por ejemplo, 42501 = sin permiso).
+        // No se registra el historial: solo el código y el mensaje del error.
+        return responder({ error: "Gemini respondió, pero no se pudo guardar el chat." }, 500);
+    }
 
     return responder({ historial: final }, 200);
 });

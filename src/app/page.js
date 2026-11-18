@@ -4,11 +4,12 @@ import Ubicacion from "@/components/Ubicacion";
 export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center flex-1 text-center p-8">
-      <h1 className="text-3xl font-bold mb-4">CLASES PARTICULARES</h1>
+      <h1 className="marca-titulo">M&amp;R</h1>
+      <p className="marca-subtitulo mb-8">academia</p>
       <p className="text-lg mb-6">
         Reservá tu turno según los horarios disponibles.
       </p>
-      <Link href="/reservar" className="bg-acento text-white px-6 py-3 rounded-lg hover:bg-acento-hover transition">
+      <Link href="/reservar" className="vidrio px-6 py-3">
         Reservar un turno
       </Link>
       <div className="mt-8 w-full flex justify-center">
