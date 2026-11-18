@@ -10,7 +10,7 @@ import Link from "next/link";
 // Link: el link de Next.js. Cambia de página sin recargar todo el sitio.
 
 export const metadata = {
-    title: "Página no encontrada | ClasesParticulares.M-G",
+    title: "Página no encontrada | ClasesParticulares.M-R",
     // Título de la pestaña mientras se ve esta página.
 };
 

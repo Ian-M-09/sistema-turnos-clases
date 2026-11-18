@@ -10,6 +10,10 @@ import { useState } from "react";
 import { achicarImagen, formatearMB, huellaArchivo, MAX_APUNTES, MAX_CANTIDAD_APUNTES, TIPOS_APUNTES } from "@/lib/archivos";
     // Las funciones y límites de archivos están en src/lib/archivos.js.
 
+const MAX_ANIO_CURSANDO = 60;
+const MAX_NOTAS = 500;
+// Los mismos límites que pone la base en 027_limite_textos_reserva.sql.
+
 export default function FormularioAlumno({ turno, datosIniciales, onContinuar }) {
     // "export" hace que esta función se pueda importar desde otros archivos.
     // "default" indica que es la exportación principal de este archivo
@@ -168,6 +172,8 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
             type="text"
             value={anioCursando}
             onChange={(e) => setAnioCursando(e.target.value)}
+            maxLength={MAX_ANIO_CURSANDO}
+            // maxLength: el navegador no deja escribir más caracteres que este número.
             placeholder="Ej: 3er año secundaria, 1er año facultad..."
             className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             />
@@ -182,8 +188,12 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
             value={notas}
             onChange={(e) => setNotas(e.target.value)}
             rows={3}
+            maxLength={MAX_NOTAS}
             className="w-full border border-borde rounded-lg px-3 py-2 bg-superficie"
             />
+            <p className="text-sm mt-1">
+            {notas.length} de {MAX_NOTAS} caracteres
+            </p>
         </div>
 
         <div className="flex flex-col text-left">

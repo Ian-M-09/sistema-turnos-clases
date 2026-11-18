@@ -211,7 +211,10 @@ export default function ReservasAdmin() {
         // key va en el <li> porque es el elemento de la lista.
         const ocupado = trabajando === r.id;
         return (
-            <li key={r.id} className="bg-superficie border border-borde rounded-lg p-4 flex flex-col gap-2 text-sm">
+            <li key={r.id} className="bg-superficie border border-borde rounded-lg p-4 flex flex-col gap-2 text-sm [overflow-wrap:anywhere]">
+            {/* overflow-wrap: anywhere: si una palabra no entra en el ancho de
+                la tarjeta, la corta y sigue en la línea de abajo. Los corchetes
+                son la forma de Tailwind de escribir una regla CSS propia. */}
             <div className="flex justify-between gap-2">
                 <p className="font-medium text-base">
                 {r.nombre} {r.apellido}

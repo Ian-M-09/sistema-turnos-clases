@@ -345,6 +345,12 @@ Deno.serve(async (request) => {
         if (respuesta.status === 429) {
             return responder({ error: "Se terminó el cupo gratuito de Gemini por ahora. Probá más tarde." }, 502);
         }
+        if (SATURADO.includes(respuesta.status)) {
+            // Llegamos acá solo si fallaron los dos modelos: el problema es de
+            // Google. Como el chat no se guardó, se puede volver a intentar.
+            console.error("Gemini saturado: los dos modelos respondieron con error", respuesta.status);
+            return responder({ error: "Gemini está saturado en este momento. Esperá unos minutos y probá de nuevo." }, 502);
+        }
         console.error("Gemini respondió", respuesta.status, await respuesta.text());
         return responder({ error: `Gemini no pudo responder (error ${respuesta.status}). Probá de nuevo.` }, 502);
     }

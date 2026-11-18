@@ -42,6 +42,11 @@ const RECHAZOS = {
         estado: 429,
         mensaje: "Subiste demasiados archivos en poco tiempo. Esperá 30 minutos y probá de nuevo.",
     },
+    limite_diario: {
+        estado: 429,
+        mensaje: "Llegaste al máximo de archivos que se pueden subir en un día. Probá de nuevo mañana.",
+        // Tope de 20 URLs cada 24 horas por alumno (026).
+    },
 };
 // Traduce cada palabra que devuelve permiso_subida a un código HTTP y a un
 // mensaje para el alumno. 429 = demasiados pedidos, 409 = conflicto con

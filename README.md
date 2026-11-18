@@ -1,4 +1,4 @@
-# ClasesParticulares.M-G
+# ClasesParticulares.M-R
 
 **Español** · [English](README.en.md)
 
@@ -112,7 +112,7 @@ Necesitás [Node.js](https://nodejs.org/) 20.9 o superior y un proyecto de [Supa
 | Integración | Qué hace falta |
 |---|---|
 | Material con IA | Desplegar `supabase/functions/gemini` y cargar en sus secretos `GEMINI_API_KEY_1` y `GEMINI_API_KEY_2` (una clave por profesor) |
-| Avisos por Telegram | Guardar el token del bot en Supabase Vault como `telegram_bot_token` y cargar el `chat_id` de cada profesor en `telegram_profesores` |
+| Avisos por Telegram | Guardar el token del bot en Supabase Vault como `telegram_bot_token` (o uno por profesor: `telegram_bot_token_1` y `telegram_bot_token_2`) y cargar el `chat_id` de cada profesor en `telegram_profesores` |
 
 ## Autor
 

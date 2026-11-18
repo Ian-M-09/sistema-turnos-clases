@@ -15,7 +15,7 @@ const workSans = Work_Sans({
 });
 
 export const metadata = {
-  title: "ClasesParticulares.M-G",
+  title: "ClasesParticulares.M-R",
   // title: el texto de la pestaña del navegador. También es el título que
   // muestran WhatsApp y Google cuando se comparte o se busca el link.
   // Las páginas que tengan su propio title (como /admin) lo reemplazan.
@@ -52,7 +52,7 @@ export default function RootLayout({ children }) {
             </a>
             {" · "}
             {/* ·: un punto medio para separar las dos partes. */}
-            © {new Date().getFullYear()} ClasesParticulares.M-G. Todos los derechos reservados.
+            © {new Date().getFullYear()} ClasesParticulares.M-R. Todos los derechos reservados.
             {/* ©: el símbolo de copyright. new Date().getFullYear(): el año
                 actual. Esta página se arma cuando Netlify compila el sitio,
                 así que el año se actualiza en el primer deploy de cada año. */}

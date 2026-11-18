@@ -1,4 +1,4 @@
-# ClasesParticulares.M-G
+# ClasesParticulares.M-R
 
 [Español](README.md) · **English**
 
@@ -114,7 +114,7 @@ You need [Node.js](https://nodejs.org/) 20.9 or later and a [Supabase](https://s
 | Integration | What it needs |
 |---|---|
 | AI material | Deploy `supabase/functions/gemini` and add `GEMINI_API_KEY_1` and `GEMINI_API_KEY_2` to its secrets (one key per teacher) |
-| Telegram alerts | Store the bot token in Supabase Vault as `telegram_bot_token` and add each teacher's `chat_id` to `telegram_profesores` |
+| Telegram alerts | Store the bot token in Supabase Vault as `telegram_bot_token` (or one per teacher: `telegram_bot_token_1` and `telegram_bot_token_2`) and add each teacher's `chat_id` to `telegram_profesores` |
 
 ## Author
 
