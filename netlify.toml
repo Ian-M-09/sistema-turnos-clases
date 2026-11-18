@@ -1,8 +1,12 @@
 [build]
-  # [build] abre la sección de configuración de la compilación.
   command = "npm run build"
   # Comando que Netlify corre para compilar el proyecto.
   publish = ".next"
-  # Carpeta con el resultado de la compilación, que es lo que se publica.
-  # Va sin barra adelante. Este valor es el que Netlify sugiere para Next.js,
-  # y tiene prioridad sobre lo que haya cargado en la pantalla del sitio.
+  # Carpeta con el resultado de la compilación.
+
+[[plugins]]
+  # Con doble corchete, TOML agrega un elemento a una LISTA. Acá, la
+  # lista de plugins que Netlify tiene que ejecutar durante el build.
+  package = "@netlify/plugin-nextjs"
+  # Plugin oficial de Netlify para Next.js: convierte las páginas dinámicas
+  # y las rutas /api en funciones que Netlify puede ejecutar.
