@@ -3,7 +3,7 @@
 // y por eso puede exportar "metadata".
 
 export const metadata = {
-    title: "Panel de profesores",
+    title: "Panel de Profesores",
     robots: { index: false, follow: false },
     // robots: le pide a Google y a otros buscadores que NO muestren esta
     // página en los resultados (index: false) ni sigan sus links

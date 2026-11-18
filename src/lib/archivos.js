@@ -35,6 +35,28 @@ export function formatearMB(bytes) {
     return (bytes / MB).toLocaleString("es-AR", { maximumFractionDigits: 1 });
 }
 
+export async function huellaArchivo(archivo) {
+    // Devuelve la "huella" (hash SHA-256) del contenido del archivo: un
+    // texto de 64 caracteres que sale igual para dos archivos con el mismo
+    // contenido, aunque tengan otro nombre (por ejemplo "apunte.pdf" y
+    // "apunte (1).pdf"), y distinto si cambia aunque sea un byte.
+    // Sirve para no subir dos veces el mismo apunte.
+    const bytes = await archivo.arrayBuffer();
+    // arrayBuffer(): lee el archivo entero como bytes. Tarda un poco, por
+    // eso lleva await.
+    const hash = await crypto.subtle.digest("SHA-256", bytes);
+    // crypto.subtle.digest: función del navegador que calcula el hash.
+    // Solo existe en sitios con https (o en localhost), como el nuestro.
+    return Array.from(new Uint8Array(hash))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    // El hash llega como bytes sueltos. new Uint8Array: los ve como una
+    // lista de números de 0 a 255. toString(16): pasa cada número a
+    // hexadecimal (base 16, por ejemplo 255 → "ff"). padStart(2, "0"):
+    // completa con un 0 adelante si quedó de un solo carácter ("a" → "0a").
+    // .join(""): los une en un solo texto.
+}
+
 export async function achicarImagen(archivo) {
     // "async" hace que la función pueda usar "await" adentro y que
     // devuelva una Promesa (un valor que llega más tarde).

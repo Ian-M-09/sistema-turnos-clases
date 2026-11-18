@@ -28,6 +28,7 @@ proyecto de Supabase de otra cuenta).
    - `020_chats_admin.sql`: cada profesor lee, crea (solo en reservas confirmadas) y actualiza los chats de Gemini de sus reservas. Lo usa la ruta del servidor /api/gemini con la sesión del profesor.
    - `021_limpieza.sql`: columna archivos_borrados_en; reservas_para_limpiar (clase de hace más de 30 días, salvo pendientes y vencidas sin devolver) y archivos_para_limpiar (sus archivos + huérfanos de más de 1 día). Solo para service_role: las usa la ruta /api/limpieza, que borra con la API de Storage.
    - `022_recordatorio_limpieza.sql`: archivos_para_limpiar deja afuera los .emptyFolderPlaceholder; enviar_telegram (función común para mandar un Telegram a un profesor); recordar_limpieza avisa el día 15 si hay algo para limpiar (pg_cron: 13:00 profesora, 18:00 profesor, hora de Argentina).
+   - `023_menos_intentos_dni.sql`: dni_bloqueado_por_intentos baja el límite de 10 a 3 DNIs inexistentes por IP en 15 minutos (sin captcha).
 
 ## Regla
 Todo cambio nuevo en la base va en un archivo nuevo con el número que

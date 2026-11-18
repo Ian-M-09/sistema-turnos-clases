@@ -7,7 +7,7 @@ import { useState } from "react";
     // "import" trae código de otro archivo o librería para poder usarlo acá.
     // { useState } son "named imports": tomamos específicamente la función
     // useState de todo lo que ofrece la librería "react".
-import { achicarImagen, formatearMB, MAX_APUNTES, TIPOS_APUNTES } from "@/lib/archivos";
+import { achicarImagen, formatearMB, huellaArchivo, MAX_APUNTES, TIPOS_APUNTES } from "@/lib/archivos";
     // Las funciones y límites de archivos están en src/lib/archivos.js.
 
 export default function FormularioAlumno({ turno, datosIniciales, onContinuar }) {
@@ -61,17 +61,71 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         }
 
         setProcesando(true);
-        const achicados = await Promise.all(elegidos.map(achicarImagen));
-        // .map llama a achicarImagen con cada archivo y devuelve una lista
-        // de Promesas. Promise.all espera a que terminen TODAS.
+        const huellas = await Promise.all(elegidos.map(huellaArchivo));
+        // La huella de cada archivo ORIGINAL (antes de achicar las fotos),
+        // para saber si es el mismo que uno que ya está en la lista.
+
+        const vistas = new Set(apuntes.map((a) => a.huella));
+        // new Set: una colección sin repetidos donde .has(valor) dice si
+        // algo está adentro. Arranca con las huellas de los apuntes que ya
+        // estaban agregados.
+        const nuevos = [];
+        const repetidos = [];
+        elegidos.forEach((archivo, i) => {
+            // forEach: recorre la lista; i es la posición (la misma en huellas).
+            if (vistas.has(huellas[i])) {
+                repetidos.push(archivo.name);
+                // Ya estaba (o vino dos veces en esta misma elección): no se agrega.
+            } else {
+                vistas.add(huellas[i]);
+                nuevos.push({ archivo, huella: huellas[i] });
+            }
+        });
+
+        const achicados = await Promise.all(nuevos.map(async ({ archivo, huella }) => {
+            // .map con una función async devuelve una lista de Promesas, y
+            // Promise.all espera a que terminen TODAS.
+            const achicado = await achicarImagen(archivo);
+            achicado.huella = huella;
+            // Le guardamos la huella al archivo para compararla la próxima
+            // vez que el alumno agregue apuntes. Un objeto File acepta
+            // propiedades nuevas como cualquier objeto de JavaScript.
+            return achicado;
+        }));
         setProcesando(false);
 
-        const nuevoTotal = bytesUsados + achicados.reduce((t, a) => t + a.size, 0);
-        if (nuevoTotal > MAX_APUNTES) {
-            setError(`Los apuntes no pueden sumar más de 3 MB (quedarían ${formatearMB(nuevoTotal)} MB).`);
-            return;
+        // Agregamos los que entran en el espacio que queda, en el orden en
+        // que se eligieron. Los que no entran se dejan afuera, pero los demás
+        // se agregan igual (antes se rechazaba toda la elección).
+        let total = bytesUsados;
+        // let: como const, pero se puede volver a asignar (lo vamos sumando).
+        const entran = [];
+        const sinLugar = [];
+        for (const archivo of achicados) {
+            // for...of: recorre la lista de a un elemento.
+            if (total + archivo.size <= MAX_APUNTES) {
+                entran.push(archivo);
+                total += archivo.size;
+                // +=: suma y guarda (total = total + archivo.size).
+            } else {
+                sinLugar.push(archivo.name);
+                // No entra, pero seguimos: puede que uno más chico de los
+                // que vienen después sí entre.
+            }
         }
-        setApuntes([...apuntes, ...achicados]);
+
+        const avisos = [];
+        if (repetidos.length > 0) {
+            avisos.push(`"${repetidos[0]}"${repetidos.length > 1 ? ` y ${repetidos.length - 1} más` : ""} ya estaba${repetidos.length > 1 ? "n" : ""} agregado${repetidos.length > 1 ? "s" : ""}.`);
+        }
+        if (sinLugar.length > 0) {
+            avisos.push(`No ${sinLugar.length > 1 ? "entraron" : "entró"} por superar los 3 MB: ${sinLugar.join(", ")}.`);
+            // .join(", "): une los nombres separados por coma.
+        }
+        if (avisos.length > 0) setError(avisos.join(" "));
+        // Un solo mensaje con los dos avisos, si hay los dos.
+
+        if (entran.length > 0) setApuntes([...apuntes, ...entran]);
         // Armamos una lista NUEVA con los anteriores y los nuevos. En React
         // nunca se modifica el estado directamente (con .push): se reemplaza.
     }

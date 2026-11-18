@@ -5,13 +5,14 @@
 
 export const DIRECCION = "12 de Octubre 827, Salta Capital";
 
-export const LINK_MAPS =
-    "https://www.google.com/maps/search/?api=1&query=" +
-    encodeURIComponent("12 de Octubre 827, Salta, Argentina");
-// Este es el formato oficial de Google para abrir una búsqueda en Maps.
-// encodeURIComponent convierte el texto para que pueda ir en una URL
-// (los espacios pasan a ser %20, la coma a %2C, etc.). En el celular,
-// el link abre directamente la app de Google Maps si está instalada.
+export const LINK_MAPS = "https://maps.app.goo.gl/sTioGYkccd8vUUwT7";
+// Link corto de Google Maps (G2): se saca desde la app de Maps con
+// Compartir. Apunta al pin exacto del estudio y queda corto en el mensaje
+// de WhatsApp (antes era una búsqueda por texto, larga y llena de %20).
+// Al link que da Compartir se le sacó el final "?g_st=aw": solo le dice a
+// Google desde dónde se compartió, no cambia a dónde lleva.
+// En el celular abre directamente la app de Google Maps si está instalada.
+// Si el estudio se muda, hay que cambiar este link y DIRECCION.
 
 export default function Ubicacion() {
     return (

@@ -194,7 +194,10 @@ export async function POST(request) {
         console.error("Gemini respondió", respuesta.status, await respuesta.text());
         // console.error en el servidor: se ve en la terminal de "npm run dev",
         // no en el navegador. Nunca mostramos la clave.
-        return respuestaError("Gemini no pudo responder. Probá de nuevo.", 502);
+        return respuestaError(`Gemini no pudo responder (error ${respuesta.status}). Probá de nuevo.`, 502);
+        // El código de Google (por ejemplo 503 = sobrecargado, 504 = tardó
+        // demasiado, 400 = pedido inválido) ayuda a saber qué pasó sin
+        // tener que ir a los logs. No revela nada privado.
     }
 
     const datos = await respuesta.json();

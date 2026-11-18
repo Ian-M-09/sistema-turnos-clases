@@ -12,9 +12,9 @@
   # y las rutas /api en funciones que Netlify puede ejecutar.
   [build.environment]
   # Variables de entorno que Netlify usa SOLO durante el build.
-  # Van acá (y no en la pantalla de Netlify) para que el fork de la
-  # profesora las herede sin cargarlas a mano. Nunca poner claves acá:
-  # este archivo está en el repo público.
+  # Van acá (y no en la pantalla de Netlify) para que queden guardadas en
+  # el repo y no haya que volver a cargarlas a mano si se crea el sitio de
+  # nuevo. Nunca poner claves acá: este archivo está en el repo público.
   SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/"
   # Carpeta que el escáner de secretos saltea: es la caché de Turbopack,
   # que guarda los valores de las variables leídas en el build (falso positivo).
