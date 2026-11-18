@@ -23,6 +23,51 @@ const MODELO = process.env.GEMINI_MODELO || "gemini-flash-latest";
 // .env.local sin tocar el código. "gemini-flash-latest" apunta siempre a
 // la última versión Flash (verificar en AI Studio que esté en el plan gratuito).
 
+const MODELO_RESPALDO = process.env.GEMINI_MODELO_RESPALDO || "gemini-flash-lite-latest";
+// Modelo de respaldo (decidido 17/11): si el principal está saturado,
+// se usa este. Es más liviano: suele estar menos saturado y responde más
+// rápido, aunque el material puede salir un poco menos elaborado.
+// Se cambia con la variable GEMINI_MODELO_RESPALDO.
+
+const SATURADO = [500, 503, 504];
+// Códigos de Google que significan "problema de ellos, probá de nuevo":
+// 500 = error interno, 503 = sobrecargado, 504 = tardó demasiado.
+// Con estos se reintenta o se pasa al respaldo. Los demás (400, 429...)
+// no se arreglan reintentando.
+
+const ESPERA_REINTENTO_MS = 2000;
+// Cuánto esperar antes de reintentar con el modelo principal (2 segundos).
+// Corto a propósito: Netlify corta la función si tarda demasiado.
+
+async function pedirAGemini(modelo, clave, cuerpo) {
+    // Hace UN pedido a Gemini con el modelo indicado. Devuelve la
+    // respuesta de fetch, o null si ni siquiera se pudo conectar.
+    try {
+        return await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": clave,
+                    // La clave va en un encabezado, no en la dirección (así no
+                    // queda escrita en los registros de los servidores).
+                },
+                body: cuerpo,
+            }
+        );
+    } catch {
+        return null;
+    }
+}
+
+function esperar(ms) {
+    // Devuelve una Promesa que se cumple después de ms milisegundos.
+    // new Promise((resolve) => ...): crea la Promesa; setTimeout llama a
+    // resolve cuando pasa el tiempo, y ahí el "await esperar(...)" sigue.
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const LARGO_MAXIMO_MENSAJE = 2000;
 // Tope de letras para un pedido de ajuste (para no gastar de más).
 
@@ -161,27 +206,36 @@ export async function POST(request) {
     }));
 
     // 7. Llamar a Gemini (su API REST, con fetch, como Telegram en 018).
-    let respuesta;
-    try {
-        respuesta = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": clave,
-                    // La clave va en un encabezado, no en la dirección (así no
-                    // queda escrita en los registros de los servidores).
-                },
-                body: JSON.stringify({
-                    systemInstruction: { parts: [{ text: PROMPT_SISTEMA }] },
-                    // systemInstruction: las reglas generales (el "rol" de Gemini).
-                    contents,
-                }),
-                // JSON.stringify: convierte el objeto en texto JSON.
-            }
-        );
-    } catch {
+    const pedidoGemini = JSON.stringify({
+        systemInstruction: { parts: [{ text: PROMPT_SISTEMA }] },
+        // systemInstruction: las reglas generales (el "rol" de Gemini).
+        contents,
+    });
+    // JSON.stringify: convierte el objeto en texto JSON. Lo armamos una
+    // sola vez porque puede mandarse hasta tres veces.
+
+    let respuesta = await pedirAGemini(MODELO, clave, pedidoGemini);
+    // let: la vamos a reemplazar si hay que reintentar.
+
+    if (respuesta?.status === 503) {
+        // 503 = sobrecargado: Google contesta rápido, así que vale la pena
+        // esperar 2 segundos y probar una vez más con el mismo modelo.
+        // (Con 500 o 504 no reintentamos el principal: un 504 ya tardó
+        // mucho y repetirlo nos acerca al tope de Netlify.)
+        await esperar(ESPERA_REINTENTO_MS);
+        respuesta = await pedirAGemini(MODELO, clave, pedidoGemini);
+    }
+
+    if (!respuesta || SATURADO.includes(respuesta.status)) {
+        // Sigue saturado (o no se pudo conectar): probamos con el respaldo.
+        // .includes: true si el código está en la lista SATURADO.
+        console.warn("Gemini", MODELO, "respondió", respuesta?.status ?? "sin conexión", "; se usa", MODELO_RESPALDO);
+        // console.warn: como console.error, pero de advertencia. Queda en el
+        // log de Netlify para saber cuántas veces hizo falta el respaldo.
+        respuesta = await pedirAGemini(MODELO_RESPALDO, clave, pedidoGemini);
+    }
+
+    if (!respuesta) {
         return respuestaError("No se pudo conectar con Gemini. Probá de nuevo.", 502);
     }
 
