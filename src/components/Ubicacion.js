@@ -16,7 +16,7 @@ export const LINK_MAPS = "https://maps.app.goo.gl/sTioGYkccd8vUUwT7";
 
 export default function Ubicacion() {
     return (
-        <div className="bg-superficie border border-borde rounded-lg p-4 text-center w-full max-w-md">
+        <div className="text-center w-full max-w-md">
             <p className="font-medium mb-2">📍 {DIRECCION}</p>
             <a
                 href={LINK_MAPS}
@@ -26,7 +26,7 @@ export default function Ubicacion() {
                 rel="noopener noreferrer"
                 // rel="noopener noreferrer": por seguridad, la pestaña nueva
                 // no puede controlar a esta (siempre va junto con _blank).
-                className="inline-block vidrio px-5 py-2"
+                className="inline-block vidrio px-3.5 py-1.5 text-sm"
             >
                 Cómo llegar (Google Maps)
             </a>

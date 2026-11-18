@@ -4,7 +4,7 @@
 
 Sistema web de reservas para clases particulares: los alumnos eligen día y horario, pagan por transferencia y suben el comprobante; los profesores confirman cada reserva desde un panel propio.
 
-**Sitio en producción:** [clasesparticulares-m-g.netlify.app](https://clasesparticulares-m-g.netlify.app/)
+**Sitio en producción:** [m-r-academia.netlify.app](https://m-r-academia.netlify.app/)
 (para reservar hace falta un DNI registrado por un profesor)
 
 Lo diseñé, desarrollé y publiqué de punta a punta, para una clienta real, con el objetivo de que funcione con **costo mensual de $0** usando planes gratuitos.

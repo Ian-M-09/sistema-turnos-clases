@@ -4,7 +4,7 @@
 
 A web booking system for private tutoring: students pick a day and time, pay by bank transfer and upload the receipt; teachers confirm each booking from their own dashboard.
 
-**Live site:** [clasesparticulares-m-g.netlify.app](https://clasesparticulares-m-g.netlify.app/)
+**Live site:** [m-r-academia.netlify.app](https://m-r-academia.netlify.app/)
 (booking requires a national ID number registered by a teacher)
 
 I designed, built and shipped it end to end for a real client, with the goal of running at **$0 per month** on free plans.
