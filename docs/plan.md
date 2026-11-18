@@ -1,6 +1,6 @@
     Sistema de turnos: plan de ejecución
 
-Última actualización: 14/11/2026
+Última actualización: 17/11/2026
 
 1. Qué es el proyecto
 
@@ -63,11 +63,11 @@ Al alumno: WhatsApp semiautomático con enlaces. Al confirmar o rechazar, el pan
 La API oficial de WhatsApp (automática) queda como mejora futura: Meta cobra por cada mensaje de plantilla entregado (tarifa según país; no se confirmó la de Argentina) y hace falta cuenta de empresa, número dedicado y plantillas aprobadas.
 El teléfono se guarda con 10 dígitos; para armar el enlace de WhatsApp hay que anteponer el prefijo de Argentina (549).
 Login de la profesora (decidido): con su cuenta de GitHub (Supabase Auth). Ella ya tiene una.
-Hosting (decidido probar): Netlify plan gratuito, que permite uso comercial. Vercel Hobby no sirve para producción (es solo para uso personal y no comercial).
+Hosting (DECIDIDO 17/11): Netlify plan gratuito, que permite uso comercial. Publicado en https://clasesparticulares-m-g.netlify.app (alumnos en /, profesores en /admin). Si en algún momento no alcanza, se pasa a otro (ver alternativas en la decisión 1). Vercel Hobby no sirve para producción (es solo para uso personal y no comercial).
 Chat con IA (Gemini): uno por reserva y aislado. Se crea cuando la profesora confirma, con los archivos de apuntes como contexto, para generar teoría y ejercicios que ella revisa en su panel (no se envía al alumno). El historial lo guarda el sistema en Supabase (opción A). A los 30 días aparece "este chat tiene más de 30 días, ¿querés borrarlo?". El borrado es manual.
 Objetivo de costo: lo más barato posible (idealmente $0 por mes).
 5. Decisiones abiertas (preguntar, no asumir)
-Hosting: confirmar Netlify con una demo. Hay que verificar que Next.js 16 despliegue bien con su adaptador y vigilar los topes mensuales del plan gratuito (se miden en créditos y, si se pasan, el sitio se pausa hasta el mes siguiente). Alternativas: Render pago (el plan que no se duerme, unos USD 7 por mes según una guía de terceros; el plan gratuito de Render se apaga a los 15 minutos sin tráfico y la primera visita puede tardar cerca de un minuto) o Cloudflare (necesita el adaptador OpenNext, el soporte en Windows no está garantizado, el límite de un Worker gratuito es 3 MiB y no se confirmó compatibilidad con Next.js 16). Con Netlify o Cloudflare, el único ping necesario es el de Supabase.
+Hosting: DECIDIDO Netlify (17/11; Next.js 16 despliega bien con @netlify/plugin-nextjs). Queda vigilar los topes mensuales del plan gratuito (se miden en créditos y, si se pasan, el sitio se pausa hasta el mes siguiente). Alternativas: Render pago (el plan que no se duerme, unos USD 7 por mes según una guía de terceros; el plan gratuito de Render se apaga a los 15 minutos sin tráfico y la primera visita puede tardar cerca de un minuto) o Cloudflare (necesita el adaptador OpenNext, el soporte en Windows no está garantizado, el límite de un Worker gratuito es 3 MiB y no se confirmó compatibilidad con Next.js 16). Con Netlify o Cloudflare, el único ping necesario es el de Supabase.
 Monto real del depósito por hora y CBU y alias reales.
 Ventana de 30 minutos para confirmar. La profesora tendría que mirar el aviso de Telegram casi al instante. Revisarlo con ella (es un solo valor configurable).
 Quién más puede entrar al panel. Cualquier persona con GitHub puede intentar iniciar sesión, así que hay que restringir el acceso a las cuentas de los dos profesores (lista de permitidos). Cada uno ve y confirma solo las reservas de sus materias; los dos manejan la lista de alumnos. Falta saber si el profesor tiene cuenta de GitHub.
@@ -80,6 +80,7 @@ Paso 0: demo online en Netlify (opcional, cuando Ian quiera mostrar avances)
 Conectar el repo de GitHub a Netlify (plan gratuito) y cargar las dos variables de entorno antes de desplegar.
 Verificar que Next.js 16 compile y funcione. Si da problemas, evaluar la alternativa (decisión 1).
 Cuando exista el guardado real, las pruebas en la demo crean filas reales en la base de la profesora. Limpiarlas después.
+YA ESTA HECHO (17/11): https://clasesparticulares-m-g.netlify.app, se despliega solo en cada push a master. netlify.toml en la raíz: build npm run build, publish .next, plugin @netlify/plugin-nextjs (sin él no se activa el adaptador: 404 y sin /api) y SECRETS_SCAN_OMIT_PATHS = .netlify/.next/cache/ (la caché de Turbopack guarda los valores de las variables y el escáner de secretos daba falso positivo; no desactivar el escáner ni omitir claves: si marca otra ruta, es una exposición real y hay que rotar la clave). Variables en Netlify: las dos NEXT_PUBLIC_ (no secretas), SUPABASE_SERVICE_ROLE_KEY y GEMINI_API_KEY_2 (secretas). Cambiar una variable no afecta al deploy ya hecho: Trigger deploy → Clear cache and deploy site. url_panel ya apunta al sitio publicado. Probado todo en el sitio.
 Fase A: guardar la reserva de verdad (núcleo)
 A0. Guardar en el repo (carpeta supabase/) los scripts SQL que ya se corrieron (tablas, columna duracion_minutos, política de lectura) y todos los que vengan, para poder recrear la base en otra cuenta. YA ESTA HECHO
 A1. Decidir el diseño de tablas. Recomendación: una tabla reservas (datos del alumno, archivos, estado, monto, creado_en, guardados una sola vez) y una tabla que una cada reserva con sus horarios de disponibilidad; así confirmar o rechazar es un solo cambio. Alternativa: una fila en turnos por horario con un reserva_id común (duplica los datos del alumno). DECIDIDO: dos tablas (reservas + reserva_horarios), turnos se borra, el monto se guarda en la reserva (lo calcula la base). Script: supabase/004_reservas.sql. YA ESTA HECHO (corrido en Supabase).
@@ -114,7 +115,7 @@ G2. Ubicación del estudio con enlace a Google Maps.
 F1. Ping anti-pausa de Supabase con GitHub Actions cada 3 o 4 días (el plan gratuito pausa los proyectos inactivos durante una semana). Es el único keep-alive necesario si el hosting es Netlify.
 F2. Datos reales: CBU y alias, monto, textos, título y descripción del sitio (hoy dice "Create Next App"), favicon y página 404.
 F3. Pruebas en celulares reales, accesibilidad básica y revisión de los límites de los planes gratuitos.
-F4. Hosting definitivo (decisión 1), cambiar la URL del link de Telegram (update ajustes set valor = 'https://el-sitio/admin' where clave = 'url_panel'), revisar el tope de tiempo de las funciones del hosting para /api/gemini (maxDuration = 60), cargar GEMINI_API_KEY_1 y GEMINI_API_KEY_2, variables de entorno en la cuenta de la profesora (su Supabase, su clave de Gemini, su bot de Telegram) y un README con los pasos del fork.
+F4. (Hosting, URL del link de Telegram y despliegue ya hechos en el Paso 0; si cambia el dominio, repetir: update ajustes set valor = 'https://el-sitio/admin' where clave = 'url_panel'.) Revisar el tope de tiempo de las funciones de Netlify para /api/gemini (maxDuration = 60), cargar GEMINI_API_KEY_1 y GEMINI_API_KEY_2, variables de entorno en la cuenta de la profesora (su Supabase, su clave de Gemini, su bot de Telegram) y un README con los pasos del fork.
 F5. Capacitación breve a la profesora y documentación de uso.
 7. Seguridad (recordatorios)
 Nunca poner claves secretas (service_role, Gemini, token del bot de Telegram) en variables NEXT_PUBLIC_ ni en el repo.
