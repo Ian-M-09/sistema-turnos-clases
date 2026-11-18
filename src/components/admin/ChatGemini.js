@@ -5,8 +5,9 @@ import { supabase } from "@/lib/supabase";
 
 // El chat con Gemini de UNA reserva (pasos E2 y E3). Se abre desde las
 // próximas clases en Reservas. Lee el historial de la tabla chats
-// (política de 020) y, para hablar con Gemini, le pide a la ruta del
-// servidor /api/gemini (ahí está la clave secreta).
+// (política de 020) y, para hablar con Gemini, llama a la Edge Function
+// "gemini" de Supabase (supabase/functions/gemini/index.ts), donde está
+// la clave secreta.
 
 export default function ChatGemini({ reservaId }) {
     const [historial, setHistorial] = useState(null);
@@ -37,31 +38,31 @@ export default function ChatGemini({ reservaId }) {
         setEsperando(true);
         setError(null);
 
-        const { data } = await supabase.auth.getSession();
-        const token = data.session?.access_token;
-        // access_token: el "pase" de la sesión. La ruta del servidor lo usa
-        // para hablar con la base como este profesor.
+        const { data, error: errorFuncion } = await supabase.functions.invoke("gemini", {
+            body: { reservaId, mensaje },
+        });
+        // functions.invoke: llama a la Edge Function y le manda solo el token
+        // de la sesión, para que hable con la base como este profesor.
+        // error: errorFuncion: guarda "error" con otro nombre, porque este
+        // componente ya tiene un estado llamado error.
 
-        try {
-            const respuesta = await fetch("/api/gemini", {
-                // "/api/gemini": la ruta de src/app/api/gemini/route.js, en
-                // este mismo sitio (por eso no lleva "https://...").
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ reservaId, mensaje }),
-            });
-            const resultado = await respuesta.json();
-            if (!respuesta.ok) {
-                setError(resultado.error ?? "Algo salió mal. Probá de nuevo.");
-            } else {
-                setHistorial(resultado.historial);
-                setPedido("");
+        if (errorFuncion) {
+            let texto = "No se pudo conectar con el servidor.";
+            if (errorFuncion.context?.json) {
+                // context: la respuesta de la función, cuando llegó a contestar.
+                // ?.: si no existe (por ejemplo, sin internet), no sigue.
+                try {
+                    const resultado = await errorFuncion.context.json();
+                    texto = resultado.error ?? "Algo salió mal. Probá de nuevo.";
+                } catch {
+                    texto = "Algo salió mal. Probá de nuevo.";
+                    // catch: la respuesta no era JSON.
+                }
             }
-        } catch {
-            setError("No se pudo conectar con el servidor.");
+            setError(texto);
+        } else {
+            setHistorial(data.historial);
+            setPedido("");
         }
         setEsperando(false);
     }

@@ -18,7 +18,7 @@ function respuestaError(mensaje, estado) {
 }
 
 async function esProfesor(request) {
-    // Igual que en /api/gemini: el navegador manda el token de la sesión.
+    // El navegador manda el token de la sesión.
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) return false;
 
