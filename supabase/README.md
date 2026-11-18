@@ -34,6 +34,7 @@ proyecto de Supabase de otra cuenta).
    - `026_tope_diario_subidas.sql`: permiso_subida suma un máximo de 20 URLs de subida por alumno cada 24 horas (además de las 6 cada 30 minutos).
    - `027_limite_textos_reserva.sql`: reservas acepta como máximo 500 caracteres en notas y 60 en anio_cursando.
    - `028_bot_por_profesor.sql`: enviar_telegram usa el token propio de cada profesor (`telegram_bot_token_1` o `telegram_bot_token_2` en Vault) y, si no existe, el común `telegram_bot_token`. avisar_reserva_nueva y recordar_cargar_horarios pasan a enviar por esa función.
+   - `029_anticipacion_3_horas.sql`: crear_reserva acepta reservas con al menos 3 horas de anticipación (antes 24). Las 24 horas quedan solo para la devolución del dinero. Correrlo antes de publicar la página que muestra esos horarios.
 
 ## Edge Functions
 - `functions/gemini/index.ts`: genera el material con Gemini. Se despliega desde el panel de Supabase (Edge Functions → Deploy a new function → Via Editor, con el nombre `gemini`) o con la CLI. Secretos: `GEMINI_API_KEY_1`, `GEMINI_API_KEY_2` y, opcionales, `GEMINI_MODELO` y `GEMINI_MODELO_RESPALDO`.

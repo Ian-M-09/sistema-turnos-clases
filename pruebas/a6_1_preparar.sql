@@ -38,8 +38,8 @@ values
   ('2028-03-16', '14:00', 5, 0, 60)
 on conflict (fecha, hora) do nothing;
 
--- Para "menos de 24 hs": hoy a las 05:13. Siempre falta menos de 24 hs
--- (o ya pasó). La hora rara es para que no choque con un horario real.
+-- Para "menos de 3 hs": hoy a las 05:13. Después de las 02:13 falta menos
+-- de 3 hs (o ya pasó). La hora rara es para que no choque con un horario real.
 insert into disponibilidad (fecha, hora, cupo_maximo, cupo_ocupado, duracion_minutos)
 values (current_date, '05:13', 5, 0, 60)
 on conflict (fecha, hora) do nothing;

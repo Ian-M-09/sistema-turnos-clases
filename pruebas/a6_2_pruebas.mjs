@@ -198,8 +198,8 @@ async function main() {
     // Para el de 05:13 buscamos la clave que termina en "05:13" (la fecha
     // es la de hoy y no la sabemos de antemano).
     const clave0513 = Object.keys(h).find((k) => k.endsWith("05:13"));
-    await esperarError("menos de 24 hs de anticipación", dni, materia,
-        [h[clave0513]], "24 horas");
+    await esperarError("menos de 3 hs de anticipación", dni, materia,
+        [h[clave0513]], "3 horas");
     await esperarError("horario que no existe", dni, materia,
         [crypto.randomUUID()], "ya no existe");
     await esperarError("sin horarios", dni, materia, [], "al menos un horario");

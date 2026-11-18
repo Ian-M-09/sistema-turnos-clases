@@ -101,7 +101,7 @@ export default function Reservar() {
                 setSinLugar(
                     error.message.includes("Ya no queda lugar") ||
                     error.message.includes("ya no existe") ||
-                    error.message.includes("24 horas")
+                    error.message.includes("3 horas de anticipación")
                 );
                 // Estos tres errores se arreglan eligiendo otro horario.
                 return;

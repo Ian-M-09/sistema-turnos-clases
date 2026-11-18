@@ -14,8 +14,10 @@ const NOMBRES_MESES = [
 
 const MESES_ADELANTE = 2;
 // Cuántos meses hacia adelante puede mirar el alumno.
-const HORAS_MINIMAS = 24;
-// Anticipación mínima para reservar (regla de la profesora).
+const HORAS_MINIMAS = 3;
+// Anticipación mínima para reservar: a las 14:00 se puede reservar desde las
+// 17:00. Tiene que ser el mismo valor que en crear_reserva (029). Las 24 horas
+// de la política de devolución son otra regla y no dependen de esta.
 const MINUTOS_MINIMOS = 60;
 // Duración mínima de una reserva: 1 hora. Un horario que dura menos
 // (media hora) solo puede ser el final de una reserva, nunca el inicio.
@@ -91,7 +93,7 @@ export default function Calendario({ onConfirmarHorarios, sinLugares }) {
 
       const limite = Date.now() + HORAS_MINIMAS * 60 * 60 * 1000;
       // Date.now() devuelve el momento actual en milisegundos.
-      // Sumamos 24 horas: horas * 60 min * 60 seg * 1000 ms.
+      // Sumamos 3 horas: horas * 60 min * 60 seg * 1000 ms.
       // Todo horario anterior a "limite" ya no se puede reservar.
 
       const disponibles = data.filter((fila) => {
