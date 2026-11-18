@@ -18,3 +18,20 @@
   SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/"
   # Carpeta que el escáner de secretos saltea: es la caché de Turbopack,
   # que guarda los valores de las variables leídas en el build (falso positivo).
+
+[[headers]]
+  # Cabeceras de seguridad: instrucciones que el servidor le da al navegador.
+  # Cubren los archivos estáticos. Las páginas de Next las sirve una función
+  # de Netlify, por eso las mismas cabeceras están también en next.config.mjs.
+  for = "/*"
+  # "/*": se aplica a todas las direcciones del sitio.
+  [headers.values]
+  X-Frame-Options = "DENY"
+  # Nadie puede meter la página dentro de un <iframe> (evita el clickjacking:
+  # engañar al usuario para que haga clic en algo que no ve).
+  X-Content-Type-Options = "nosniff"
+  # El navegador respeta el tipo de archivo declarado y no intenta adivinarlo.
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  # A otros sitios solo se les informa el dominio, no la dirección completa.
+  Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+  # La página no puede usar la cámara, el micrófono ni la ubicación.

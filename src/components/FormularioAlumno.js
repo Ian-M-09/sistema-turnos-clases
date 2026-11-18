@@ -7,7 +7,7 @@ import { useState } from "react";
     // "import" trae código de otro archivo o librería para poder usarlo acá.
     // { useState } son "named imports": tomamos específicamente la función
     // useState de todo lo que ofrece la librería "react".
-import { achicarImagen, formatearMB, huellaArchivo, MAX_APUNTES, TIPOS_APUNTES } from "@/lib/archivos";
+import { achicarImagen, formatearMB, huellaArchivo, MAX_APUNTES, MAX_CANTIDAD_APUNTES, TIPOS_APUNTES } from "@/lib/archivos";
     // Las funciones y límites de archivos están en src/lib/archivos.js.
 
 export default function FormularioAlumno({ turno, datosIniciales, onContinuar }) {
@@ -101,9 +101,13 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         // let: como const, pero se puede volver a asignar (lo vamos sumando).
         const entran = [];
         const sinLugar = [];
+        const sobran = [];
         for (const archivo of achicados) {
             // for...of: recorre la lista de a un elemento.
-            if (total + archivo.size <= MAX_APUNTES) {
+            if (apuntes.length + entran.length >= MAX_CANTIDAD_APUNTES) {
+                sobran.push(archivo.name);
+                // Ya están los 5 apuntes permitidos: este queda afuera.
+            } else if (total + archivo.size <= MAX_APUNTES) {
                 entran.push(archivo);
                 total += archivo.size;
                 // +=: suma y guarda (total = total + archivo.size).
@@ -121,6 +125,9 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
         if (sinLugar.length > 0) {
             avisos.push(`No ${sinLugar.length > 1 ? "entraron" : "entró"} por superar los 3 MB: ${sinLugar.join(", ")}.`);
             // .join(", "): une los nombres separados por coma.
+        }
+        if (sobran.length > 0) {
+            avisos.push(`Podés subir hasta ${MAX_CANTIDAD_APUNTES} apuntes. Quedaron afuera: ${sobran.join(", ")}.`);
         }
         if (avisos.length > 0) setError(avisos.join(" "));
         // Un solo mensaje con los dos avisos, si hay los dos.
@@ -218,7 +225,7 @@ export default function FormularioAlumno({ turno, datosIniciales, onContinuar })
             </ul>
             )}
             <p className="text-sm mt-1">
-            Usado: {formatearMB(bytesUsados)} MB de 3 MB
+            Usado: {formatearMB(bytesUsados)} MB de 3 MB ({apuntes.length} de {MAX_CANTIDAD_APUNTES} archivos)
             </p>
         </div>
 
